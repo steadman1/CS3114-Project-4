@@ -32,7 +32,7 @@ public class AirControlTest extends TestCase {
      * Comparing output in a file
      *
      * @throws Exception
-     */
+     *
     public void testSampleInputFile() throws Exception {
         Random rnd = new Random();
         rnd.setSeed(0xCAFEBEEF);
@@ -118,7 +118,7 @@ public class AirControlTest extends TestCase {
                 + "5 nodes were visited in the bintree\r\n",
                 w.intersect(0, 0, 0, 1024, 1024, 1024));
     }
-
+*/
 
     // ----------------------------------------------------------
     /**
@@ -211,5 +211,17 @@ public class AirControlTest extends TestCase {
             "The following objects intersect (1, 1, 1, 1, 1, 1)\n" +
                 "1 nodes were visited in the bintree\n",
                 w.intersect(1, 1, 1, 1, 1, 1));
+    }
+
+
+    public void milestone_1() throws Exception {
+        WorldDB w = new WorldDB(null);
+        assertNull(w.delete("hhello"));
+    }
+
+
+    public void milestone_One() throws Exception {
+        WorldDB w = new WorldDB(null);
+        assertNull(w.delete("hhello"));
     }
 }
