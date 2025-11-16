@@ -87,38 +87,36 @@ public class DataNode implements BintreeNode {
     @Override
     public BintreeNode insert(AirObject obj, int x, int y, int z,
         int xWid, int yWid, int zWid, int depth) {
-        
+
         // 1. Add the object to the list.
         objects.add(obj);
 
         // 2. Check if we need to split.
-        if (objects.size() > MAX_OBJECTS) {
-            // We have 4 (or more) objects.
+        //    Rule: "splits if it contains more than three boxes" (size > 3)
+        if (objects.size() > MAX_OBJECTS) { // size is 4 or more
             
-            // 3. Check the split criteria
-            boolean allIntersect = checkAllIntersect();
-            
-            if (!allIntersect) {
-                // 4. We must split!
-                // 4a. Create a new InternalNode.
-                //    (This node will be a Bintree internal node now)
+            // 3. Check the exception rule:
+            //    "...unless all of the boxes have a non-empty intersection box"
+            if (!checkAllIntersect()) {
+                // 4a. We must split.
                 InternalNode newInternal = new InternalNode();
                 
-                // 4c. Re-insert all objects *from this node* into the
-                //     new InternalNode.
+                // 4b. Re-insert all objects *from this node* (including the
+                //     new one we just added) into the new internal node.
                 for (int i = 0; i < objects.size(); i++) {
-                    // Pass the new region parameters
                     newInternal.insert(objects.get(i), x, y, z,
                         xWid, yWid, zWid, depth);
                 }
                 
-                // 4d. Return the new InternalNode
+                // 4c. Return the new internal node to replace this leaf.
                 return newInternal;
             }
-            // If all objects *do* intersect, we don't split.
+            // 4d. If all objects *do* intersect, we don't split.
+            //     Just fall through and return 'this'.
         }
-
-        // If we didn't split, just return ourselves.
+        
+        // 5. If we didn't split (because size <= 3 OR
+        //    size > 3 and all objects intersect), just return ourselves.
         return this;
     }
 
