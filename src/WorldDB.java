@@ -12,7 +12,7 @@ public class WorldDB implements ATC {
 
 
     private SkipList<String, AirObject> skipList;
-    private Bintree bintree;
+    // private Bintree bintree;
 
     /**
      * Create a brave new World.
@@ -33,7 +33,7 @@ public class WorldDB implements ATC {
      */
     public void clear() {
         skipList = new SkipList<>(rnd);
-        bintree = new Bintree(worldSize);
+        // bintree = new Bintree(worldSize);
     }
 
 
@@ -53,7 +53,7 @@ public class WorldDB implements ATC {
         }
 
         skipList.insert(a.getName(), a);
-        bintree.insert(a);
+        // bintree.insert(a);
         return true;
     }
 
@@ -79,7 +79,7 @@ public class WorldDB implements ATC {
         }
         
         // If found, remove from Bintree as well
-        bintree.remove(obj);
+        // bintree.remove(obj);
         
         // Return the string representation
         return obj.toString();
@@ -104,7 +104,7 @@ public class WorldDB implements ATC {
      * @return String listing the Bintree nodes as specified.
      */
     public String printbintree() {
-        return bintree.print();
+        return ""; // bintree.print();
     }
 
 
@@ -165,7 +165,7 @@ public class WorldDB implements ATC {
      * @return String listing the AirObjects that participate in collisions.
      */
     public String collisions() {
-        return bintree.collisions();
+        return ""; //bintree.collisions();
     }
 
 
@@ -198,7 +198,7 @@ public class WorldDB implements ATC {
         }
 
         // Delegate the intersection search and formatting to the Bintree class
-        return bintree.intersect(x, y, z, xwid, ywid, zwid);
+        return ""; // bintree.intersect(x, y, z, xwid, ywid, zwid);
     }
 
 
