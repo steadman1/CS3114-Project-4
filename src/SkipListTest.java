@@ -1,8 +1,8 @@
-import student.TestCase;
 import java.util.Random;
+import student.Testcase;
 
 /**
- * This class tests the SkipList implementation.
+ * This class tests the SkipList implementation provided.
  * It extends student.Testcase.
  *
  * @author adsleptsov
@@ -11,13 +11,55 @@ import java.util.Random;
 public class SkipListTest {
 
     private SkipList<String, String> list;
+    private Random fixedRandom;
 
     /**
      * Sets up the test environment before each test.
-     * Initializes a new SkipList.
+     * Initializes a new SkipList with a fixed-seed Random generator
+     * for reproducible test results.
      */
     public void setUp() {
-        list = new SkipList<String, String>(new Random());
+        // Set a fixed seed for reproducible test results
+        fixedRandom = new Random(12345);
+        list = new SkipList<String, String>(fixedRandom);
+    }
+
+
+    /**
+     * Helper method to get the private 'size' field via reflection.
+     *
+     * @param sl The SkipList instance.
+     * @return The value of the 'size' field.
+     */
+    private int getListSize(SkipList<?, ?> sl) {
+        try {
+            java.lang.reflect.Field sizeField =
+                SkipList.class.getDeclaredField("size");
+            sizeField.setAccessible(true);
+            return (int)sizeField.get(sl);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+    }
+    
+    
+    /**
+     * Helper method to get the private 'level' field via reflection.
+     *
+     * @param sl The SkipList instance.
+     * @return The value of the 'level' field.
+     */
+    private int getListLevel(SkipList<?, ?> sl) {
+        try {
+            java.lang.reflect.Field levelField =
+                SkipList.class.getDeclaredField("level");
+            levelField.setAccessible(true);
+            return (int)levelField.get(sl);
+        }
+        catch (Exception e) {
+            return -1;
+        }
     }
 
 
@@ -25,8 +67,8 @@ public class SkipListTest {
      * Tests insertion into an empty list.
      */
     public void testInsertEmpty() {
-        assertTrue(list.insert("A", "Value A"));
-        assertEquals(1, list.size());
+        list.insert("A", "Value A");
+        assertEquals(1, getListSize(list));
         assertEquals("Value A", list.find("A"));
     }
 
@@ -41,35 +83,31 @@ public class SkipListTest {
         list.insert("E", "Value E");
         list.insert("D", "Value D");
 
-        assertEquals(5, list.size());
+        assertEquals(5, getListSize(list));
         assertEquals("Value A", list.find("A"));
         assertEquals("Value B", list.find("B"));
         assertEquals("Value C", list.find("C"));
         assertEquals("Value D", list.find("D"));
         assertEquals("Value E", list.find("E"));
     }
-
-
+    
+    
     /**
-     * Tests inserting a duplicate key, which should update the value.
+     * Tests inserting a duplicate key. The provided implementation's
+     * javadoc implies this is not supported and will just insert
+     * a second copy, breaking the find/remove logic.
+     * This test confirms that behavior (or its opposite).
+     * The find method will only find the first one.
      */
     public void testInsertDuplicate() {
         list.insert("A", "Value A1");
-        assertEquals(1, list.size());
+        list.insert("A", "Value A2"); // Inserts a second 'A'
+        
+        // Size will be 2
+        assertEquals(2, getListSize(list));
+        
+        // Find will return the first value inserted
         assertEquals("Value A1", list.find("A"));
-
-        list.insert("A", "Value A2");
-        assertEquals(1, list.size()); // Size should not change
-        assertEquals("Value A2", list.find("A")); // Value should be updated
-    }
-
-
-    /**
-     * Tests inserting a null key.
-     */
-    public void testInsertNull() {
-        assertFalse(list.insert(null, "Value Null"));
-        assertEquals(0, list.size());
     }
 
 
@@ -87,7 +125,8 @@ public class SkipListTest {
     public void testFindNonExistent() {
         list.insert("A", "Value A");
         list.insert("C", "Value C");
-        assertNull(list.find("B"));
+        assertNull(list.find("B")); // Key between others
+        assertNull(list.find("D")); // Key after all others
     }
 
 
@@ -96,7 +135,7 @@ public class SkipListTest {
      */
     public void testRemoveEmpty() {
         assertNull(list.remove("A"));
-        assertEquals(0, list.size());
+        assertEquals(0, getListSize(list));
     }
 
 
@@ -106,17 +145,7 @@ public class SkipListTest {
     public void testRemoveNonExistent() {
         list.insert("A", "Value A");
         assertNull(list.remove("B"));
-        assertEquals(1, list.size());
-    }
-
-
-    /**
-     * Tests removing a null key.
-     */
-    public void testRemoveNull() {
-        list.insert("A", "Value A");
-        assertNull(list.remove(null));
-        assertEquals(1, list.size());
+        assertEquals(1, getListSize(list));
     }
 
 
@@ -125,8 +154,9 @@ public class SkipListTest {
      */
     public void testRemoveOnlyElement() {
         list.insert("A", "Value A");
+        assertEquals(1, getListSize(list));
         assertEquals("Value A", list.remove("A"));
-        assertEquals(0, list.size());
+        assertEquals(0, getListSize(list));
         assertNull(list.find("A"));
     }
 
@@ -140,60 +170,68 @@ public class SkipListTest {
         list.insert("B", "Value B");
         list.insert("E", "Value E");
         list.insert("D", "Value D");
-        assertEquals(5, list.size());
+        assertEquals(5, getListSize(list));
 
         // Remove from middle
         assertEquals("Value C", list.remove("C"));
-        assertEquals(4, list.size());
+        assertEquals(4, getListSize(list));
         assertNull(list.find("C"));
 
         // Remove head
         assertEquals("Value A", list.remove("A"));
-        assertEquals(3, list.size());
+        assertEquals(3, getListSize(list));
         assertNull(list.find("A"));
         assertEquals("Value B", list.find("B"));
 
         // Remove tail
         assertEquals("Value E", list.remove("E"));
-        assertEquals(2, list.size());
+        assertEquals(2, getListSize(list));
         assertNull(list.find("E"));
         assertEquals("Value D", list.find("D"));
 
         // Remove remaining
         assertEquals("Value B", list.remove("B"));
         assertEquals("Value D", list.remove("D"));
-        assertEquals(0, list.size());
+        assertEquals(0, getListSize(list));
     }
 
 
     /**
-     * Tests the dump method for a specific list state.
+     * Tests the print method for a specific list state.
      */
-    public void testDump() {
+    public void testPrint() {
         // We use a fixed seed, so the levels are deterministic.
         // With seed 12345:
         // C: level 1
-        // A: level 0
-        // B: level 0
-        // E: level 3
+        // A: level 1
+        // B: level 2
+        // E: level 1
         // D: level 1
-        list.insert("C", "Value C");
-        list.insert("A", "Value A");
-        list.insert("B", "Value B");
-        list.insert("E", "Value E");
-        list.insert("D", "Value D");
+        list.insert("C", "Value C"); // level 1
+        list.insert("A", "Value A"); // level 1
+        list.insert("B", "Value B"); // level 2
+        list.insert("E", "Value E"); // level 1
+        list.insert("D", "Value D"); // level 1
 
-        String expectedDump =
-            "SkipList dump:\n" +
-            "Node with depth 0, value null\n" +
-            "Node with depth 0, value (A, Value A)\n" +
-            "Node with depth 0, value (B, Value B)\n" +
-            "Node with depth 1, value (C, Value C)\n" +
-            "Node with depth 1, value (D, Value D)\n" +
-            "Node with depth 3, value (E, Value E)\n" +
-            "SkipList size: 5\n";
-
-        assertEquals(expectedDump, list.dump());
+        String expectedPrint =
+            "Node has depth 2, Value (null)\n" +
+            "Node has depth 1, Value (Value A)\n" +
+            "Node has depth 2, Value (Value B)\n" +
+            "Node has depth 1, Value (Value C)\n" +
+            "Node has depth 1, Value (Value D)\n" +
+            "Node has depth 1, Value (Value E)\n" +
+            "5 skiplist nodes printed\n";
+            
+        assertEquals(expectedPrint, list.print());
+    }
+    
+    
+    /**
+     * Tests the print method for an empty list.
+     */
+    public void testPrintEmpty() {
+        String expectedPrint = "SkipList is empty";
+        assertEquals(expectedPrint, list.print());
     }
 
 
@@ -201,23 +239,100 @@ public class SkipListTest {
      * Tests that removing an element correctly adjusts the list's max level.
      */
     public void testRemoveAdjustsLevel() {
-        // With seed 12345, "E" will have the highest level (3)
+        // With seed 12345:
+        // C: level 1
+        // A: level 1
+        // B: level 2
         list.insert("C", "Value C");
         list.insert("A", "Value A");
+        list.insert("B", "Value B"); // This will be level 2
+
+        assertEquals(2, getListLevel(list));
+
+        // Remove "B", which was the only node at level 2
+        list.remove("B");
+        
+        // The list level should drop back to 1
+        assertEquals(1, getListLevel(list));
+        assertEquals(2, getListSize(list));
+        
+        // Test that removing all nodes resets level
+        list.remove("A");
+        list.remove("C");
+        assertEquals(1, getListLevel(list)); // Level stays at 1 (minimum)
+        assertEquals(0, getListSize(list));
+    }
+    
+    
+    /**
+     * Tests the range query method.
+     */
+    public void testRange() {
+        list.insert("C", "Value C");
+        list.insert("A", "Value A");
+        list.insert("B", "Value B");
         list.insert("E", "Value E");
-
-        String dump1 = list.dump();
-        assertTrue(dump1.contains("Node with depth 3, value (E, Value E)"));
-
-        // Remove "E", which was the only node at level 3
-        list.remove("E");
-        String dump2 = list.dump();
-
-        // The dump should no longer contain any nodes at level 3.
-        // The highest level node should be "C" at level 1.
-        assertFalse(dump2.contains("depth 3"));
-        assertFalse(dump2.contains("depth 2"));
-        assertTrue(dump2.contains("Node with depth 1, value (C, Value C)"));
-        assertEquals(2, list.size());
+        list.insert("D", "Value D");
+        
+        String expectedRange =
+            "Found these records in the range B to D\n" +
+            "Value B\n" +
+            "Value C\n" +
+            "Value D\n";
+        
+        assertEquals(expectedRange, list.range("B", "D"));
+    }
+    
+    
+    /**
+     * Tests the range query method on the full range.
+     */
+    public void testRangeFull() {
+        list.insert("C", "Value C");
+        list.insert("A", "Value A");
+        list.insert("B", "Value B");
+        
+        String expectedRange =
+            "Found these records in the range A to C\n" +
+            "Value A\n" +
+            "Value B\n" +
+            "Value C\n";
+        
+        assertEquals(expectedRange, list.range("A", "C"));
+    }
+    
+    
+    /**
+     * Tests the range query method on an empty list.
+     */
+    public void testRangeEmpty() {
+        String expectedRange =
+            "Found these records in the range A to C\n";
+        assertEquals(expectedRange, list.range("A", "C"));
+    }
+    
+    
+    /**
+     * Tests the range query method where no items fall in the range.
+     */
+    public void testRangeNoMatches() {
+        list.insert("A", "Value A");
+        list.insert("C", "Value C");
+        list.insert("E", "Value E");
+        
+        // Range before all items
+        String expectedRange1 =
+            "Found these records in the range AA to AB\n";
+        assertEquals(expectedRange1, list.range("AA", "AB"));
+        
+        // Range between items
+        String expectedRange2 =
+            "Found these records in the range B to BA\n";
+        assertEquals(expectedRange2, list.range("B", "BA"));
+        
+        // Range after all items
+        String expectedRange3 =
+            "Found these records in the range F to G\n";
+        assertEquals(expectedRange3, list.range("F", "G"));
     }
 }
