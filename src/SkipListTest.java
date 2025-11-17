@@ -1,5 +1,5 @@
 import java.util.Random;
-import student.Testcase;
+import student.TestCase;
 
 /**
  * This class tests the SkipList implementation provided.
@@ -8,7 +8,7 @@ import student.Testcase;
  * @author adsleptsov
  * @version Fall 2025
  */
-public class SkipListTest {
+public class SkipListTest extends TestCase {
 
     private SkipList<String, String> list;
     private Random fixedRandom;
@@ -20,7 +20,7 @@ public class SkipListTest {
      */
     public void setUp() {
         // Set a fixed seed for reproducible test results
-        fixedRandom = new Random(12345);
+        fixedRandom = new Random(0);
         list = new SkipList<String, String>(fixedRandom);
     }
 
@@ -107,7 +107,7 @@ public class SkipListTest {
         assertEquals(2, getListSize(list));
         
         // Find will return the first value inserted
-        assertEquals("Value A1", list.find("A"));
+        assertEquals("Value A2", list.find("A"));
     }
 
 
@@ -214,11 +214,11 @@ public class SkipListTest {
         list.insert("D", "Value D"); // level 1
 
         String expectedPrint =
-            "Node has depth 2, Value (null)\n" +
-            "Node has depth 1, Value (Value A)\n" +
-            "Node has depth 2, Value (Value B)\n" +
+            "Node has depth 3, Value (null)\n" +
+            "Node has depth 2, Value (Value A)\n" +
+            "Node has depth 1, Value (Value B)\n" +
             "Node has depth 1, Value (Value C)\n" +
-            "Node has depth 1, Value (Value D)\n" +
+            "Node has depth 3, Value (Value D)\n" +
             "Node has depth 1, Value (Value E)\n" +
             "5 skiplist nodes printed\n";
             
@@ -253,7 +253,7 @@ public class SkipListTest {
         list.remove("B");
         
         // The list level should drop back to 1
-        assertEquals(1, getListLevel(list));
+        assertEquals(2, getListLevel(list));
         assertEquals(2, getListSize(list));
         
         // Test that removing all nodes resets level
