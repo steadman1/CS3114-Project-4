@@ -80,7 +80,13 @@ public class EmptyNode implements BintreeNode {
         }
         
         // Append empty node marker
-        sb.append("E\n");
+        sb.append("E (");
+        sb.append(x).append(", ").append(y).append(", ").append(z);
+        sb.append(", ");
+        sb.append(xWid).append(", ").append(yWid).append(", ").append(zWid);
+        sb.append(") ");
+        sb.append(depth);
+        sb.append("\n");
         
         // This is one node
         return 1;
