@@ -2,8 +2,8 @@ import java.util.Random;
 import student.TestCase;
 
 /**
- * @author Spencer Steadman (steadman), Alex Sleptsov (adsleptsov)
- * @version 1.0
+ * @author {Your Name Here}
+ * @version {Put Something Here}
  */
 public class AirControlTest extends TestCase {
 
@@ -29,11 +29,10 @@ public class AirControlTest extends TestCase {
     // ----------------------------------------------------------
     /**
      * Test syntax: Sample Input/Output
-     * Comparing output in a file
      *
      * @throws Exception
-     *
-    public void testSampleInputFile() throws Exception {
+     */
+    public void testSampleInput() throws Exception {
         Random rnd = new Random();
         rnd.setSeed(0xCAFEBEEF);
         WorldDB w = new WorldDB(rnd);
@@ -66,7 +65,7 @@ public class AirControlTest extends TestCase {
                 + "    (Airplane Air1 0 10 1 20 2 30 USAir 717 4)\r\n"
                 + "    (Balloon B1 10 11 11 21 12 31 hot_air 15)\r\n"
                 + "    (Bird pterodactyl 0 100 20 10 50 50 Dinosaur 1)\r\n"
-                + "    Leaf with 1 objects (0, 256, 0, 512, 512, 1024) 2\r\n"
+                + "    Leaf with 1 objects (0, 512, 0, 512, 512, 1024) 2\r\n"
                 + "    (Drone Air2 100 1010 101 924 2 900 Droners 3)\r\n"
                 + "  Leaf with 1 objects (512, 0, 0, 512, 1024, 1024) 1\r\n"
                 + "  (Drone Air2 100 1010 101 924 2 900 Droners 3)\r\n"
@@ -118,7 +117,7 @@ public class AirControlTest extends TestCase {
                 + "5 nodes were visited in the bintree\r\n",
                 w.intersect(0, 0, 0, 1024, 1024, 1024));
     }
-*/
+
 
     // ----------------------------------------------------------
     /**
@@ -211,17 +210,5 @@ public class AirControlTest extends TestCase {
             "The following objects intersect (1, 1, 1, 1, 1, 1)\n" +
                 "1 nodes were visited in the bintree\n",
                 w.intersect(1, 1, 1, 1, 1, 1));
-    }
-
-
-    public void milestone_1() throws Exception {
-        WorldDB w = new WorldDB(null);
-        assertNull(w.delete("hhello"));
-    }
-
-
-    public void milestone_One() throws Exception {
-        WorldDB w = new WorldDB(null);
-        assertNull(w.delete("hhello"));
     }
 }
