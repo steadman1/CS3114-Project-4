@@ -70,4 +70,11 @@ public class Bintree {
         sb.append(" Bintree nodes printed\n");
         return sb.toString();
     }
+    
+    public String collisions() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("The following collisions exist in the database");
+        return sb.toString();
+    }
 }
