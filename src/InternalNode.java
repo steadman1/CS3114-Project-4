@@ -1,402 +1,329 @@
 /**
  * Represents an internal node in the Bintree.
- * This node splits the world on one axis at a time,
- * rotating between x, y, and z based on depth.
- * It has two children, "left" (low) and "right" (high).
+ * This class is part of the Composite design pattern.
+ * It is required to make BintreeDataNode testable.
  *
  * @author adsleptsov
  * @version Fall 2025
  */
-public class InternalNode implements BintreeNode {
+public class BintreeInternalNode implements BintreeNode {
 
     /**
-     * The "left" (or "low") child.
-     * For X-split, this is region with lower X.
-     * For Y-split, this is region with lower Y.
-     * For Z-split, this is region with lower Z.
+     * The children of this node.
      */
     private BintreeNode left;
-
-    /**
-     * The "right" (or "high") child.
-     * For X-split, this is region with higher X.
-     * For Y-split, this is region with higher Y.
-     * For Z-split, this is region with higher Z.
-     */
     private BintreeNode right;
 
     /**
-     * Creates a new InternalNode.
-     * Initializes both children to the Flyweight EmptyNode.
+     * Creates a new BintreeInternalNode.
+     *
+     * @param left  The left child.
+     * @param right The right child.
      */
-    public InternalNode() {
-        this.left = EmptyNode.getInstance();
-        this.right = EmptyNode.getInstance();
-    }
-    
-    /**
-     * Creates a new InternalNode with the given children.
-     */
-    public InternalNode(BintreeNode left, BintreeNode right) {
+    public BintreeInternalNode(BintreeNode left, BintreeNode right) {
         this.left = left;
         this.right = right;
     }
 
 
     /**
-     * Helper to create the indentation string.
-     * @param depth The current depth.
-     * @return A string of spaces.
+     * {@inheritDoc}
+     *
+     * Delegates the insertion to the appropriate child node(s)
+     * based on the splitting axis for this level.
      */
-    private String indent(int depth) {
-        return "  ".repeat(depth);
-    }
-
-
     @Override
-    public BintreeNode insert(AirObject obj, int x, int y, int z,
+    public BintreeNode insert(
+        AirObject obj, int x, int y, int z,
         int xWid, int yWid, int zWid, int depth) {
 
-        // Determine which axis to split on
-        int axis = depth % 3;
+        // Determine splitting dimension and midpoint
+        int dim = depth % 3;
+        int mid;
+        int leftX = x, leftY = y, leftZ = z;
+        int leftXWid = xWid, leftYWid = yWid, leftZWid = zWid;
+        int rightX = x, rightY = y, rightZ = z;
+        int rightXWid = xWid, rightYWid = yWid, rightZWid = zWid;
 
-        if (axis == 0) { // --- Split on X ---
-            // --- FIX: Calculate both widths to avoid losing pixels ---
-            int leftXWid = xWid / 2;
-            int rightXWid = xWid - leftXWid;
-            int midX = x + leftXWid;
-            // --- END FIX ---
-
-            // Check left child (low X)
-            if (obj.intersects(x, y, z, leftXWid, yWid, zWid)) {
-                left = left.insert(obj, x, y, z,
-                    leftXWid, yWid, zWid, depth + 1);
-            }
-            // Check right child (high X)
-            if (obj.intersects(midX, y, z, rightXWid, yWid, zWid)) {
-                right = right.insert(obj, midX, y, z,
-                    rightXWid, yWid, zWid, depth + 1);
-            }
-        }
-        else if (axis == 1) { // --- Split on Y ---
-            // --- FIX: Calculate both widths to avoid losing pixels ---
-            int leftYWid = yWid / 2;
-            int rightYWid = yWid - leftYWid;
-            int midY = y + leftYWid;
-            // --- END FIX ---
-
-            // Check left child (low Y)
-            if (obj.intersects(x, y, z, xWid, leftYWid, zWid)) {
-                left = left.insert(obj, x, y, z,
-                    xWid, leftYWid, zWid, depth + 1);
-            }
-            // Check right child (high Y)
-            if (obj.intersects(x, midY, z, xWid, rightYWid, zWid)) {
-                right = right.insert(obj, x, midY, z,
-                    xWid, rightYWid, zWid, depth + 1);
-            }
-        }
-        else { // --- Split on Z ---
-            // --- FIX: Calculate both widths to avoid losing pixels ---
-            int leftZWid = zWid / 2;
-            int rightZWid = zWid - leftZWid;
-            int midZ = z + leftZWid;
-            // --- END FIX ---
-
-            // Check left child (low Z)
-            if (obj.intersects(x, y, z, xWid, yWid, leftZWid)) {
-                left = left.insert(obj, x, y, z,
-                    xWid, yWid, leftZWid, depth + 1);
-            }
-            // Check right child (high Z)
-            if (obj.intersects(x, y, midZ, xWid, yWid, rightZWid)) {
-                right = right.insert(obj, x, y, midZ,
-                    xWid, yWid, rightZWid, depth + 1);
-            }
-        }
-        
-        return this; // An internal node never replaces itself on insert
-    }
-
-
-    @Override
-    public BintreeNode remove(AirObject obj, int x, int y, int z,
-        int xWid, int yWid, int zWid, int depth) {
-        
-        // Determine which axis to split on
-        int axis = depth % 3;
-
-        if (axis == 0) { // --- Split on X ---
-            // --- FIX: Calculate both widths ---
-            int leftXWid = xWid / 2;
-            int rightXWid = xWid - leftXWid;
-            int midX = x + leftXWid;
-            // --- END FIX ---
-            if (obj.intersects(x, y, z, leftXWid, yWid, zWid)) {
-                left = left.remove(obj, x, y, z,
-                    leftXWid, yWid, zWid, depth + 1);
-            }
-            if (obj.intersects(midX, y, z, rightXWid, yWid, zWid)) {
-                right = right.remove(obj, midX, y, z,
-                    rightXWid, yWid, zWid, depth + 1);
-            }
-        }
-        else if (axis == 1) { // --- Split on Y ---
-            // --- FIX: Calculate both widths ---
-            int leftYWid = yWid / 2;
-            int rightYWid = yWid - leftYWid;
-            int midY = y + leftYWid;
-            // --- END FIX ---
-            if (obj.intersects(x, y, z, xWid, leftYWid, zWid)) {
-                left = left.remove(obj, x, y, z,
-                    xWid, leftYWid, zWid, depth + 1);
-            }
-            if (obj.intersects(x, midY, z, xWid, rightYWid, zWid)) {
-                right = right.remove(obj, x, midY, z,
-                    xWid, rightYWid, zWid, depth + 1);
-            }
-        }
-        else { // --- Split on Z ---
-            // --- FIX: Calculate both widths ---
-            int leftZWid = zWid / 2;
-            int rightZWid = zWid - leftZWid;
-            int midZ = z + leftZWid;
-            // --- END FIX ---
-            if (obj.intersects(x, y, z, xWid, yWid, leftZWid)) {
-                left = left.remove(obj, x, y, z,
-                    xWid, yWid, leftZWid, depth + 1);
-            }
-            if (obj.intersects(x, y, midZ, xWid, yWid, rightZWid)) {
-                right = right.remove(obj, x, y, midZ,
-                    xWid, yWid, rightZWid, depth + 1);
-            }
+        switch (dim) {
+            case 0: // X-axis
+                mid = x + (xWid / 2);
+                leftXWid = xWid / 2;
+                rightX = mid;
+                rightXWid = xWid - leftXWid;
+                break;
+            case 1: // Y-axis
+                mid = y + (yWid / 2);
+                leftYWid = yWid / 2;
+                rightY = mid;
+                rightYWid = yWid - leftYWid;
+                break;
+            default: // Z-axis
+                mid = z + (zWid / 2);
+                leftZWid = zWid / 2;
+                rightZ = mid;
+                rightZWid = zWid - leftZWid;
+                break;
         }
 
-        // **Consolidation**
-        // If both children are now empty, this internal node
-        // becomes an empty node.
-        if (left == EmptyNode.getInstance() && right == EmptyNode.getInstance()) {
-            return EmptyNode.getInstance();
+        // Check which child(ren) the object intersects
+        // An object is stored in EVERY leaf it intersects.
+        boolean intersectsLeft = intersectsRegion(
+            obj, leftX, leftY, leftZ, leftXWid, leftYWid, leftZWid);
+        boolean intersectsRight = intersectsRegion(
+            obj, rightX, rightY, rightZ, rightXWid, rightYWid, rightZWid);
+
+        if (intersectsLeft) {
+            left = left.insert(obj, leftX, leftY, leftZ,
+                leftXWid, leftYWid, leftZWid, depth + 1);
         }
-        
+        if (intersectsRight) {
+            right = right.insert(obj, rightX, rightY, rightZ,
+                rightXWid, rightYWid, rightZWid, depth + 1);
+        }
+
         return this;
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * Delegates the removal to the appropriate child node(s).
+     */
     @Override
-    public int print(StringBuilder sb, int x, int y, int z,
+    public BintreeNode remove(
+        AirObject obj, int x, int y, int z,
         int xWid, int yWid, int zWid, int depth) {
-        
-        // 1. Print this node's header
-        sb.append(indent(depth));
-        sb.append("I (");
-        sb.append(x).append(", ").append(y).append(", ").append(z);
-        sb.append(", ");
-        sb.append(xWid).append(", ").append(yWid).append(", ").append(zWid);
-        sb.append(") ");
-        sb.append(depth);
-        sb.append("\n");
-        
-        int nodesPrinted = 1; // Count this node
 
-        // 2. Determine child regions and recurse
-        int axis = depth % 3;
+        // Determine splitting dimension and midpoint (same as insert)
+        int dim = depth % 3;
+        int mid;
+        int leftX = x, leftY = y, leftZ = z;
+        int leftXWid = xWid, leftYWid = yWid, leftZWid = zWid;
+        int rightX = x, rightY = y, rightZ = z;
+        int rightXWid = xWid, rightYWid = yWid, rightZWid = zWid;
 
-        if (axis == 0) { // --- Split on X ---
-            // --- FIX: Calculate both widths ---
-            int leftXWid = xWid / 2;
-            int rightXWid = xWid - leftXWid;
-            int midX = x + leftXWid;
-            // --- END FIX ---
-            nodesPrinted += left.print(sb, x, y, z,
-                leftXWid, yWid, zWid, depth + 1);
-            nodesPrinted += right.print(sb, midX, y, z,
-                rightXWid, yWid, zWid, depth + 1);
+        switch (dim) {
+            case 0: // X-axis
+                mid = x + (xWid / 2);
+                leftXWid = xWid / 2;
+                rightX = mid;
+                rightXWid = xWid - leftXWid;
+                break;
+            case 1: // Y-axis
+                mid = y + (yWid / 2);
+                leftYWid = yWid / 2;
+                rightY = mid;
+                rightYWid = yWid - leftYWid;
+                break;
+            default: // Z-axis
+                mid = z + (zWid / 2);
+                leftZWid = zWid / 2;
+                rightZ = mid;
+                rightZWid = zWid - leftZWid;
+                break;
         }
-        else if (axis == 1) { // --- Split on Y ---
-            // --- FIX: Calculate both widths ---
-            int leftYWid = yWid / 2;
-            int rightYWid = yWid - leftYWid;
-            int midY = y + leftYWid;
-            // --- END FIX ---
-            nodesPrinted += left.print(sb, x, y, z,
-                xWid, leftYWid, zWid, depth + 1);
-            nodesPrinted += right.print(sb, x, midY, z,
-                xWid, rightYWid, zWid, depth + 1);
+
+        // Recurse down to find the object
+        // Note: This logic assumes an object doesn't change position.
+        // If it straddled, it must be removed from both.
+        boolean intersectsLeft = intersectsRegion(
+            obj, leftX, leftY, leftZ, leftXWid, leftYWid, leftZWid);
+        boolean intersectsRight = intersectsRegion(
+            obj, rightX, rightY, rightZ, rightXWid, rightYWid, rightZWid);
+
+        if (intersectsLeft) {
+            left = left.remove(obj, leftX, leftY, leftZ,
+                leftXWid, leftYWid, leftZWid, depth + 1);
         }
-        else { // --- Split on Z ---
-            // --- FIX: Calculate both widths ---
-            int leftZWid = zWid / 2;
-            int rightZWid = zWid - leftZWid;
-            int midZ = z + leftZWid;
-            // --- END FIX ---
-            nodesPrinted += left.print(sb, x, y, z,
-                xWid, yWid, leftZWid, depth + 1);
-            nodesPrinted += right.print(sb, x, y, midZ,
-                xWid, yWid, rightZWid, depth + 1);
+        if (intersectsRight) {
+            right = right.remove(obj, rightX, rightY, rightZ,
+                rightXWid, rightYWid, rightZWid, depth + 1);
         }
-            
-        return nodesPrinted;
+
+        // Check for node collapse (optional, but good for testing)
+        // If both children are now empty, this internal node becomes empty.
+        if (left == BintreeEmptyNode.getInstance() &&
+            right == BintreeEmptyNode.getInstance()) {
+            return BintreeEmptyNode.getInstance();
+        }
+
+        return this;
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * Prints "I" for internal and recurses to children.
+     */
     @Override
-    public void collisions(StringBuilder sb, int x, int y, int z,
+    public int print(
+        StringBuilder sb, int x, int y, int z,
         int xWid, int yWid, int zWid, int depth) {
         
-        // Internal nodes don't report collisions, they just
-        // delegate to their children.
-        
-        int axis = depth % 3;
+        String indent = "  ".repeat(depth);
+        sb.append(indent).append("I\n");
 
-        if (axis == 0) { // --- Split on X ---
-            // --- FIX: Calculate both widths ---
-            int leftXWid = xWid / 2;
-            int rightXWid = xWid - leftXWid;
-            int midX = x + leftXWid;
-            // --- END FIX ---
-            left.collisions(sb, x, y, z, leftXWid, yWid, zWid, depth + 1);
-            right.collisions(sb, midX, y, z, rightXWid, yWid, zWid, depth + 1);
+        int nodes = 1;
+
+        // Determine splitting dimension and midpoint (same as insert)
+        int dim = depth % 3;
+        int mid;
+        int leftX = x, leftY = y, leftZ = z;
+        int leftXWid = xWid, leftYWid = yWid, leftZWid = zWid;
+        int rightX = x, rightY = y, rightZ = z;
+        int rightXWid = xWid, rightYWid = yWid, rightZWid = zWid;
+
+        switch (dim) {
+            case 0: mid = x + (xWid / 2); leftXWid = xWid / 2;
+                rightX = mid; rightXWid = xWid - leftXWid; break;
+            case 1: mid = y + (yWid / 2); leftYWid = yWid / 2;
+                rightY = mid; rightYWid = yWid - leftYWid; break;
+            default: mid = z + (zWid / 2); leftZWid = zWid / 2;
+                rightZ = mid; rightZWid = zWid - leftZWid; break;
         }
-        else if (axis == 1) { // --- Split on Y ---
-            // --- FIX: Calculate both widths ---
-            int leftYWid = yWid / 2;
-            int rightYWid = yWid - leftYWid;
-            int midY = y + leftYWid;
-            // --- END FIX ---
-            left.collisions(sb, x, y, z, xWid, leftYWid, zWid, depth + 1);
-            right.collisions(sb, x, midY, z, xWid, rightYWid, zWid, depth + 1);
-        }
-        else { // --- Split on Z ---
-            // --- FIX: Calculate both widths ---
-            int leftZWid = zWid / 2;
-            int rightZWid = zWid - leftZWid;
-            int midZ = z + leftZWid;
-            // --- END FIX ---
-            left.collisions(sb, x, y, z, xWid, yWid, leftZWid, depth + 1);
-            right.collisions(sb, x, y, midZ, xWid, yWid, rightZWid, depth + 1);
-        }
+
+        nodes += left.print(sb, leftX, leftY, leftZ,
+            leftXWid, leftYWid, leftZWid, depth + 1);
+        nodes += right.print(sb, rightX, rightY, rightZ,
+            rightXWid, rightYWid, rightZWid, depth + 1);
+        
+        return nodes;
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * Recurses to children to find collisions.
+     */
+    @Override
+    public void collisions(
+        StringBuilder sb, int x, int y, int z,
+        int xWid, int yWid, int zWid, int depth) {
+        
+        // Determine splitting dimension and midpoint (same as insert)
+        int dim = depth % 3;
+        int mid;
+        int leftX = x, leftY = y, leftZ = z;
+        int leftXWid = xWid, leftYWid = yWid, leftZWid = zWid;
+        int rightX = x, rightY = y, rightZ = z;
+        int rightXWid = xWid, rightYWid = yWid, rightZWid = zWid;
+
+        switch (dim) {
+            case 0: mid = x + (xWid / 2); leftXWid = xWid / 2;
+                rightX = mid; rightXWid = xWid - leftXWid; break;
+            case 1: mid = y + (yWid / 2); leftYWid = yWid / 2;
+                rightY = mid; rightYWid = yWid - leftYWid; break;
+            default: mid = z + (zWid / POST); leftZWid = zWid / 2;
+                rightZ = mid; rightZWid = zWid - leftZWid; break;
+        }
+
+        left.collisions(sb, leftX, leftY, leftZ,
+            leftXWid, leftYWid, leftZWid, depth + 1);
+        right.collisions(sb, rightX, rightY, rightZ,
+            rightXWid, rightYWid, rightZWid, depth + 1);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     *
+     * Recurses to children that intersect the query box.
+     */
     @Override
     public int intersect(
         StringBuilder sb,
         int qx, int qy, int qz, int qxwid, int qywid, int qzwid,
         int x, int y, int z, int xWid, int yWid, int zWid, int depth) {
-            
-        // 1. Print this node's header
-        sb.append(indent(depth));
-        sb.append("In Internal node (");
-        sb.append(x).append(", ").append(y).append(", ").append(z);
-        sb.append(", ");
-        sb.append(xWid).append(", ").append(yWid).append(", ").append(zWid);
-        sb.append(") ");
-        sb.append(depth);
-        sb.append("\n");
         
         int nodesVisited = 1; // Count this node
-        
-        // 2. Determine child regions and recurse
-        int axis = depth % 3;
 
-        if (axis == 0) { // --- Split on X ---
-            // --- FIX: Calculate both widths ---
-            int leftXWid = xWid / 2;
-            int rightXWid = xWid - leftXWid;
-            int midX = x + leftXWid;
-            // --- END FIX ---
-            // Check left
-            if (intersectsQuery(qx, qy, qz, qxwid, qywid, qzwid,
-                x, y, z, leftXWid, yWid, zWid)) {
-                nodesVisited += left.intersect(sb,
-                    qx, qy, qz, qxwid, qywid, qzwid,
-                    x, y, z, leftXWid, yWid, zWid, depth + 1);
-            }
-            // Check right
-            if (intersectsQuery(qx, qy, qz, qxwid, qywid, qzwid,
-                midX, y, z, rightXWid, yWid, zWid)) {
-                nodesVisited += right.intersect(sb,
-                    qx, qy, qz, qxwid, qywid, qzwid,
-                    midX, y, z, rightXWid, yWid, zWid, depth + 1);
-            }
+        // Determine splitting dimension and midpoint (same as insert)
+        int dim = depth % 3;
+        int mid;
+        int leftX = x, leftY = y, leftZ = z;
+        int leftXWid = xWid, leftYWid = yWid, leftZWid = zWid;
+        int rightX = x, rightY = y, rightZ = z;
+        int rightXWid = xWid, rightYWid = yWid, rightZWid = zWid;
+
+        switch (dim) {
+            case 0: mid = x + (xWid / 2); leftXWid = xWid / 2;
+                rightX = mid; rightXWid = xWid - leftXWid; break;
+            case 1: mid = y + (yWid / 2); leftYWid = yWid / 2;
+                rightY = mid; rightYWid = yWid - leftYWid; break;
+            default: mid = z + (zWid / 2); leftZWid = zWid / 2;
+                rightZ = mid; rightZWid = zWid - leftZWid; break;
         }
-        else if (axis == 1) { // --- Split on Y ---
-            // --- FIX: Calculate both widths ---
-            int leftYWid = yWid / 2;
-            int rightYWid = yWid - leftYWid;
-            int midY = y + leftYWid;
-            // --- END FIX ---
-            // Check left
-            if (intersectsQuery(qx, qy, qz, qxwid, qywid, qzwid,
-                x, y, z, xWid, leftYWid, zWid)) {
-                nodesVisited += left.intersect(sb,
-                    qx, qy, qz, qxwid, qywid, qzwid,
-                    x, y, z, xWid, leftYWid, zWid, depth + 1);
-            }
-            // Check right
-            if (intersectsQuery(qx, qy, qz, qxwid, qywid, qzwid,
-                x, midY, z, xWid, rightYWid, zWid)) {
-                nodesVisited += right.intersect(sb,
-                    qx, qy, qz, qxwid, qywid, qzwid,
-                    x, midY, z, xWid, rightYWid, zWid, depth + 1);
-            }
+
+        // Check if query intersects left child's region
+        if (queryIntersectsRegion(qx, qy, qz, qxwid, qywid, qzwid,
+            leftX, leftY, leftZ, leftXWid, leftYWid, leftZWid)) {
+            nodesVisited += left.intersect(sb, qx, qy, qz, qxwid, qywid, qzwid,
+                leftX, leftY, leftZ, leftXWid, leftYWid, leftZWid, depth + 1);
         }
-        else { // --- Split on Z ---
-            // --- FIX: Calculate both widths ---
-            int leftZWid = zWid / 2;
-            int rightZWid = zWid - leftZWid;
-            int midZ = z + leftZWid;
-            // --- END FIX ---
-            // Check left
-            if (intersectsQuery(qx, qy, qz, qxwid, qywid, qzwid,
-                x, y, z, xWid, yWid, leftZWid)) {
-                nodesVisited += left.intersect(sb,
-                    qx, qy, qz, qxwid, qywid, qzwid,
-                    x, y, z, xWid, yWid, leftZWid, depth + 1);
-            }
-            // Check right
-            if (intersectsQuery(qx, qy, qz, qxwid, qywid, qzwid,
-                x, y, midZ, xWid, yWid, rightZWid)) {
-                nodesVisited += right.intersect(sb,
-                    qx, qy, qz, qxwid, qywid, qzwid,
-                    x, y, midZ, xWid, yWid, rightZWid, depth + 1);
-            }
+
+        // Check if query intersects right child's region
+        if (queryIntersectsRegion(qx, qy, qz, qxwid, qywid, qzwid,
+            rightX, rightY, rightZ, rightXWid, rightYWid, rightZWid)) {
+            nodesVisited += right.intersect(sb, qx, qy, qz, qxwid, qywid, qzwid,
+                rightX, rightY, rightZ, rightXWid, rightYWid, rightZWid, depth + 1);
         }
-        
+
         return nodesVisited;
     }
 
 
     /**
-     * Helper method to check intersection between a query box and
-     * a child region.
+     * Helper method to check if an AirObject intersects a region.
      */
-    private boolean intersectsQuery(
-        int qx, int qy, int qz, int qxw, int qyw, int qzw,
+    private boolean intersectsRegion(
+        AirObject obj,
         int rx, int ry, int rz, int rxw, int ryw, int rzw) {
-
-        // Query box coords
-        int qx1 = qx;
-        int qx2 = qx + qxw;
-        int qy1 = qy;
-        int qy2 = qy + qyw;
-        int qz1 = qz;
-        int qz2 = qz + qzw;
         
-        // Region coords
-        int rx1 = rx;
-        int rx2 = rx + rxw;
-        int ry1 = ry;
-        int ry2 = ry + ryw;
-        int rz1 = rz;
-        int rz2 = rz + rzw;
+        boolean noOverlap =
+            (obj.getXorig() + obj.getXwidth() <= rx) ||
+            (obj.getXorig() >= rx + rxw) ||
+            (obj.getYorig() + obj.getYwidth() <= ry) ||
+            (obj.getYorig() >= ry + ryw) ||
+            (obj.getZorig() + obj.getZwidth() <= rz) ||
+            (obj.getZorig() >= rz + rzw);
+        return !noOverlap;
+    }
 
-        // Check for non-intersection
-        boolean noXOverlap = (qx1 >= rx2) || (qx2 <= rx1);
-        boolean noYOverlap = (qy1 >= ry2) || (qy2 <= ry1);
-        boolean noZOverlap = (qz1 >= rz2) || (qz2 <= rz1);
 
-        return !(noXOverlap || noYOverlap || noZOverlap);
+    /**
+     * Helper method to check if a query box intersects a region.
+     */
+    private boolean queryIntersectsRegion(
+        int qx, int qy, int qz, int qxwid, int qywid, int qzwid,
+        int rx, int ry, int rz, int rxw, int ryw, int rzw) {
+        
+        boolean noOverlap =
+            (qx + qxwid <= rx) ||
+            (qx >= rx + rxw) ||
+            (qy + qywid <= ry) ||
+            (qy >= ry + ryw) ||
+            (qz + qzwid <= rz) ||
+            (qz >= rz + rzw);
+        return !noOverlap;
+    }
+
+
+    /**
+     * Getter for the left child (for testing).
+     */
+    public BintreeNode getLeft() {
+        return left;
+    }
+
+
+    /**
+     * Getter for the right child (for testing).
+     */
+    public BintreeNode getRight() {
+        return right;
     }
 }
