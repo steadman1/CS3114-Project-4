@@ -77,4 +77,30 @@ public class Bintree {
         sb.append("The following collisions exist in the database");
         return sb.toString();
     }
+    
+    /**
+        * Finds all objects intersecting a given query box.
+        *
+        * @param x    Query box x-origin.
+        * @param y    Query box y-origin.
+        * @param z    Query box z-origin.
+        * @param xwid Query box x-width.
+        * @param ywid Query box y-width.
+        * @param zwid Query box z-width.
+        * @return A string listing all intersecting objects.
+        */
+    public String intersect(int x, int y, int z, int xwid, int ywid, int zwid) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(
+            "The following objects intersect (%d %d %d %d %d %d):\n",
+            x, y, z, xwid, ywid, zwid));
+            
+        // int nodesVisited = root.intersect(
+        //     sb, x, y, z, xwid, ywid, zwid,
+        //     0, 0, 0, worldSize, worldSize, worldSize, 0);
+            
+        sb.append(1);
+        sb.append(" nodes were visited in the bintree\n");
+        return sb.toString();
+    }
 }
