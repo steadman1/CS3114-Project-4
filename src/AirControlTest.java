@@ -2,8 +2,8 @@ import java.util.Random;
 import student.TestCase;
 
 /**
- * @author {Your Name Here}
- * @version {Put Something Here}
+ * @author Spencer Steadman (steadman), Alex Sleptsov (adsleptsov)
+ * @version 1.0
  */
 public class AirControlTest extends TestCase {
 
@@ -32,7 +32,7 @@ public class AirControlTest extends TestCase {
      * Comparing output in a file
      *
      * @throws Exception
-     *
+     */
     public void testSampleInputFile() throws Exception {
         Random rnd = new Random();
         rnd.setSeed(0xCAFEBEEF);
@@ -118,7 +118,6 @@ public class AirControlTest extends TestCase {
                 + "5 nodes were visited in the bintree\r\n",
                 w.intersect(0, 0, 0, 1024, 1024, 1024));
     }
-*/
 
     // ----------------------------------------------------------
     /**
