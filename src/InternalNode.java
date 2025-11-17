@@ -6,7 +6,7 @@
  * @author adsleptsov
  * @version Fall 2025
  */
-public class BintreeInternalNode implements BintreeNode {
+public class InternalNode implements BintreeNode {
 
     /**
      * The children of this node.
@@ -20,7 +20,7 @@ public class BintreeInternalNode implements BintreeNode {
      * @param left  The left child.
      * @param right The right child.
      */
-    public BintreeInternalNode(BintreeNode left, BintreeNode right) {
+    public InternalNode(BintreeNode left, BintreeNode right) {
         this.left = left;
         this.right = right;
     }
@@ -144,9 +144,9 @@ public class BintreeInternalNode implements BintreeNode {
 
         // Check for node collapse (optional, but good for testing)
         // If both children are now empty, this internal node becomes empty.
-        if (left == BintreeEmptyNode.getInstance() &&
-            right == BintreeEmptyNode.getInstance()) {
-            return BintreeEmptyNode.getInstance();
+        if (left == EmptyNode.getInstance() &&
+            right == EmptyNode.getInstance()) {
+            return EmptyNode.getInstance();
         }
 
         return this;
@@ -217,7 +217,7 @@ public class BintreeInternalNode implements BintreeNode {
                 rightX = mid; rightXWid = xWid - leftXWid; break;
             case 1: mid = y + (yWid / 2); leftYWid = yWid / 2;
                 rightY = mid; rightYWid = yWid - leftYWid; break;
-            default: mid = z + (zWid / POST); leftZWid = zWid / 2;
+            default: mid = z + (zWid / 2); leftZWid = zWid / 2;
                 rightZ = mid; rightZWid = zWid - leftZWid; break;
         }
 
