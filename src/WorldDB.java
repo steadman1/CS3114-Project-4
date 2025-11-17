@@ -12,7 +12,7 @@ public class WorldDB implements ATC {
 
 
     private SkipList<String, AirObject> skipList;
-    // private Bintree bintree;
+    private Bintree bintree;
 
     /**
      * Create a brave new World.
@@ -104,7 +104,7 @@ public class WorldDB implements ATC {
      * @return String listing the Bintree nodes as specified.
      */
     public String printbintree() {
-        return ""; // bintree.print();
+        return bintree.print();
     }
 
 
