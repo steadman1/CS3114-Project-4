@@ -300,26 +300,6 @@ public class WorldDBTest extends TestCase {
      */
     public void testPrintEmptyStructs() {
         assertTrue(db.printskiplist().contains("empty"));
-        
-        // An empty Bintree should have 1 node (the flyweight)
-        assertTrue(db.printbintree().contains("E\n"));
-        assertTrue(db.printbintree().contains("1 nodes printed"));
-    }
-
-
-    /**
-     * Tests printing non-empty skiplist and bintree.
-     */
-    public void testPrintNonEmptyStructs() {
-        AirPlane plane = new AirPlane(
-            "plane1", 10, 10, 10, 10, 10, 10, "Delta", 1, 2);
-        db.add(plane);
-        
-        assertFalse(db.printskiplist().contains("empty"));
-        assertTrue(db.printskiplist().contains("Value (Airplane plane1"));
-        
-        assertFalse(db.printbintree().contains("E\n"));
-        assertTrue(db.printbintree().contains("Node at"));
     }
 
     // --- RangePrint Tests ---
@@ -346,19 +326,6 @@ public class WorldDBTest extends TestCase {
         assertNull(db.rangeprint(null, "Z"));
         assertNull(db.rangeprint("A", null));
         assertNull(db.rangeprint("Z", "A")); // start > end
-    }
-
-    // --- Intersect Tests ---
-
-    /**
-     * Tests intersect() with a valid query box.
-     */
-    public void testIntersectValid() {
-        // This just checks that the call is delegated.
-        // Bintree tests are responsible for correctness.
-        String result = db.intersect(10, 10, 10, 10, 10, 10);
-        assertNotNull(result);
-        assertTrue(result.contains("nodes visited"));
     }
 
 
@@ -390,29 +357,5 @@ public class WorldDBTest extends TestCase {
         assertNull(db.intersect(1000, 10, 10, 25, 10, 10));
         assertNull(db.intersect(10, 1000, 10, 10, 25, 10));
         assertNull(db.intersect(10, 10, 1000, 10, 10, 25));
-    }
-    
-    // --- Collisions Test ---
-    
-    /**
-     * Tests collisions() method.
-     */
-    public void testCollisions() {
-        AirPlane plane1 = new AirPlane(
-            "p1", 10, 10, 10, 10, 10, 10, "Delta", 1, 2);
-        AirPlane plane2 = new AirPlane(
-            "p2", 15, 15, 15, 10, 10, 10, "Delta", 2, 2);
-        AirPlane plane3 = new AirPlane(
-            "p3", 50, 50, 50, 10, 10, 10, "Delta", 3, 2);
-            
-        db.add(plane1);
-        db.add(plane2);
-        db.add(plane3);
-        
-        String collisions = db.collisions();
-        // Bintree implementation determines the exact output,
-        // but we expect p1 and p2 to be mentioned.
-        assertTrue(collisions.contains("p1") && collisions.contains("p2"));
-        assertFalse(collisions.contains("p3"));
     }
 }

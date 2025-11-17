@@ -115,7 +115,24 @@ public class SkipList<K extends Comparable<K>, V> {
         // Head node has MAX_LEVEL pointers, all initially null
         this.head = new SkipNode<>(null, null, MAX_LEVEL);
     }
-
+    
+    /**
+    * Gets the current level of the skip list.
+    *
+    * @return The current level.
+    */
+    public int level() {
+        return level;
+    }
+    
+    /**
+     * Gets the size of the skip list.
+     *
+     * @return The size of the skip list.
+     */
+    public int size() {
+        return size;
+    }
 
     /**
      * Generates a random level (depth) for a new node.

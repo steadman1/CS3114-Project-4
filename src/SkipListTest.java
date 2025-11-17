@@ -24,51 +24,12 @@ public class SkipListTest extends TestCase {
         list = new SkipList<String, String>(fixedRandom);
     }
 
-
-    /**
-     * Helper method to get the private 'size' field via reflection.
-     *
-     * @param sl The SkipList instance.
-     * @return The value of the 'size' field.
-     */
-    private int getListSize(SkipList<?, ?> sl) {
-        try {
-            java.lang.reflect.Field sizeField =
-                SkipList.class.getDeclaredField("size");
-            sizeField.setAccessible(true);
-            return (int)sizeField.get(sl);
-        }
-        catch (Exception e) {
-            return -1;
-        }
-    }
-    
-    
-    /**
-     * Helper method to get the private 'level' field via reflection.
-     *
-     * @param sl The SkipList instance.
-     * @return The value of the 'level' field.
-     */
-    private int getListLevel(SkipList<?, ?> sl) {
-        try {
-            java.lang.reflect.Field levelField =
-                SkipList.class.getDeclaredField("level");
-            levelField.setAccessible(true);
-            return (int)levelField.get(sl);
-        }
-        catch (Exception e) {
-            return -1;
-        }
-    }
-
-
     /**
      * Tests insertion into an empty list.
      */
     public void testInsertEmpty() {
         list.insert("A", "Value A");
-        assertEquals(1, getListSize(list));
+        assertEquals(1, list.size());
         assertEquals("Value A", list.find("A"));
     }
 
@@ -83,7 +44,7 @@ public class SkipListTest extends TestCase {
         list.insert("E", "Value E");
         list.insert("D", "Value D");
 
-        assertEquals(5, getListSize(list));
+        assertEquals(5, list.size());
         assertEquals("Value A", list.find("A"));
         assertEquals("Value B", list.find("B"));
         assertEquals("Value C", list.find("C"));
@@ -104,7 +65,7 @@ public class SkipListTest extends TestCase {
         list.insert("A", "Value A2"); // Inserts a second 'A'
         
         // Size will be 2
-        assertEquals(2, getListSize(list));
+        assertEquals(2, list.size());
         
         // Find will return the first value inserted
         assertEquals("Value A2", list.find("A"));
@@ -135,7 +96,7 @@ public class SkipListTest extends TestCase {
      */
     public void testRemoveEmpty() {
         assertNull(list.remove("A"));
-        assertEquals(0, getListSize(list));
+        assertEquals(0, list.size());
     }
 
 
@@ -145,7 +106,7 @@ public class SkipListTest extends TestCase {
     public void testRemoveNonExistent() {
         list.insert("A", "Value A");
         assertNull(list.remove("B"));
-        assertEquals(1, getListSize(list));
+        assertEquals(1, list.size());
     }
 
 
@@ -154,9 +115,9 @@ public class SkipListTest extends TestCase {
      */
     public void testRemoveOnlyElement() {
         list.insert("A", "Value A");
-        assertEquals(1, getListSize(list));
+        assertEquals(1, list.size());
         assertEquals("Value A", list.remove("A"));
-        assertEquals(0, getListSize(list));
+        assertEquals(0, list.size());
         assertNull(list.find("A"));
     }
 
@@ -170,29 +131,29 @@ public class SkipListTest extends TestCase {
         list.insert("B", "Value B");
         list.insert("E", "Value E");
         list.insert("D", "Value D");
-        assertEquals(5, getListSize(list));
+        assertEquals(5, list.size());
 
         // Remove from middle
         assertEquals("Value C", list.remove("C"));
-        assertEquals(4, getListSize(list));
+        assertEquals(4, list.size());
         assertNull(list.find("C"));
 
         // Remove head
         assertEquals("Value A", list.remove("A"));
-        assertEquals(3, getListSize(list));
+        assertEquals(3, list.size());
         assertNull(list.find("A"));
         assertEquals("Value B", list.find("B"));
 
         // Remove tail
         assertEquals("Value E", list.remove("E"));
-        assertEquals(2, getListSize(list));
+        assertEquals(2, list.size());
         assertNull(list.find("E"));
         assertEquals("Value D", list.find("D"));
 
         // Remove remaining
         assertEquals("Value B", list.remove("B"));
         assertEquals("Value D", list.remove("D"));
-        assertEquals(0, getListSize(list));
+        assertEquals(0, list.size());
     }
 
 
@@ -247,20 +208,20 @@ public class SkipListTest extends TestCase {
         list.insert("A", "Value A");
         list.insert("B", "Value B"); // This will be level 2
 
-        assertEquals(2, getListLevel(list));
+        assertEquals(2, list.level());
 
         // Remove "B", which was the only node at level 2
         list.remove("B");
         
         // The list level should drop back to 1
-        assertEquals(2, getListLevel(list));
-        assertEquals(2, getListSize(list));
+        assertEquals(2, list.level());
+        assertEquals(2, list.size());
         
         // Test that removing all nodes resets level
         list.remove("A");
         list.remove("C");
-        assertEquals(1, getListLevel(list)); // Level stays at 1 (minimum)
-        assertEquals(0, getListSize(list));
+        assertEquals(1, list.level()); // Level stays at 1 (minimum)
+        assertEquals(0, list.size());
     }
     
     
