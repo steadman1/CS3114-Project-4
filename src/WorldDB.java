@@ -33,7 +33,7 @@ public class WorldDB implements ATC {
      */
     public void clear() {
         skipList = new SkipList<>(rnd);
-        // bintree = new Bintree(worldSize);
+        bintree = new Bintree(worldSize);
     }
 
 
@@ -53,7 +53,7 @@ public class WorldDB implements ATC {
         }
 
         skipList.insert(a.getName(), a);
-        // bintree.insert(a);
+        bintree.insert(a);
         return true;
     }
 
