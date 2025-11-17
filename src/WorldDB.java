@@ -198,7 +198,7 @@ public class WorldDB implements ATC {
         }
 
         // Delegate the intersection search and formatting to the Bintree class
-        return ""; // bintree.intersect(x, y, z, xwid, ywid, zwid);
+        return bintree.intersect(x, y, z, xwid, ywid, zwid);
     }
 
 
