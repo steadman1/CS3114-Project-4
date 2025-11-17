@@ -33,6 +33,14 @@ public class InternalNode implements BintreeNode {
         this.left = EmptyNode.getInstance();
         this.right = EmptyNode.getInstance();
     }
+    
+    /**
+     * Creates a new InternalNode with the given children.
+     */
+    public InternalNode(BintreeNode left, BintreeNode right) {
+        this.left = left;
+        this.right = right;
+    }
 
 
     /**

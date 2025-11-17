@@ -1,5 +1,6 @@
 /**
  * Represents a leaf node in the Bintree that contains data.
+ * This class is part of the Composite design pattern.
  *
  * @author adsleptsov
  * @version Fall 2025
@@ -7,20 +8,13 @@
 public class DataNode implements BintreeNode {
 
     /**
-     * A list of AirObjects in this node.
-     * We must use our own list class, not ArrayList.
+     * The list of AirObjects stored in this leaf node.
+     * [cite_start]Using SimpleList as required, since ArrayList is not permitted. [cite: 75-76]
      */
     private SimpleList objects;
 
     /**
-     * Max objects before we *must* try to split.
-     * The rule is "splits if it contains more than three boxes"
-     */
-    private static final int MAX_OBJECTS = 3;
-
-
-    /**
-     * Creates a new, empty DataNode.
+     * Creates a new, empty BintreeDataNode.
      */
     public DataNode() {
         this.objects = new SimpleList();
@@ -28,207 +22,282 @@ public class DataNode implements BintreeNode {
 
 
     /**
-     * Helper to create the indentation string.
-     * @param depth The current depth.
-     * @return A string of spaces.
+     * {@inheritDoc}
+     *
+     * Inserts the object into this node's list. If the list
+     * size exceeds 3, it checks the splitting criteria and
+     * may split, returning a new BintreeInternalNode.
      */
-    private String indent(int depth) {
-        return "  ".repeat(depth);
+    @Override
+    public BintreeNode insert(
+        AirObject obj, int x, int y, int z,
+        int xWid, int yWid, int zWid, int depth) {
+
+        this.objects.add(obj);
+
+        if (this.objects.size() > 3) {
+            // Check the exception: "unless all of the boxes
+            if (!this.checkAllIntersect()) {
+                // SPLIT: Exception not met.
+                return this.split(x, y, z, xWid, yWid, zWid, depth);
+            }
+            // else: Exception is met, do not split.
+        }
+
+        // No split, just return this node
+        return this;
     }
 
 
     /**
-     * Checks the split criteria: "unless all of the boxes
-     * have a non-empty intersection box"
-     * @return True if all objects intersect, false otherwise.
+     * Splits this data node into a new internal node.
+     * It re-inserts all of its current objects into the new
+     * internal node, which will filter them down to new children.
+     *
+     * @return The new BintreeInternalNode that replaces this node.
      */
-    private boolean checkAllIntersect() {
-        if (objects.size() <= 1) {
-            return true;
-        }
+    private BintreeNode split(
+        int x, int y, int z, int xWid,
+        int yWid, int zWid, int depth) {
         
-        // Find the intersection of all boxes.
-        // Start with the bounds of the first box.
-        AirObject first = objects.get(0);
-        int ix1 = first.getXorig();
-        int iy1 = first.getYorig();
-        int iz1 = first.getZorig();
-        int ix2 = ix1 + first.getXwidth();
-        int iy2 = iy1 + first.getYwidth();
-        int iz2 = iz1 + first.getZwidth();
+        // Create the new internal node that will replace this data node
+        BintreeNode newNode = new InternalNode(
+            EmptyNode.getInstance(), EmptyNode.getInstance());
 
-        for (int i = 1; i < objects.size(); i++) {
-            AirObject current = objects.get(i);
-            int cx1 = current.getXorig();
-            int cy1 = current.getYorig();
-            int cz1 = current.getZorig();
-            int cx2 = cx1 + current.getXwidth();
-            int cy2 = cy1 + current.getYwidth();
-            int cz2 = cz1 + current.getZwidth();
-
-            // Update the intersection box
-            ix1 = Math.max(ix1, cx1);
-            iy1 = Math.max(iy1, cy1);
-            iz1 = Math.max(iz1, cz1);
-            ix2 = Math.min(ix2, cx2);
-            iy2 = Math.min(iy2, cy2);
-            iz2 = Math.min(iz2, cz2);
-
-            // Check if the intersection is non-empty
-            // Per spec, touching (width=0) is empty.
-            if (ix1 >= ix2 || iy1 >= iy2 || iz1 >= iz2) {
-                return false; // Intersection is empty
-            }
+        // Re-insert all objects from this node into the new internal node.
+        // The internal node's insert logic will handle
+        // distributing them to the correct new children.
+        for (int i = 0; i < this.objects.size(); i++) {
+            AirObject obj = this.objects.get(i);
+            newNode = newNode.insert(obj, x, y, z, xWid, yWid, zWid, depth);
         }
-        return true; // Intersection is non-empty
+
+        return newNode;
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * Removes the object from this node's list. If the list
+     * becomes empty, this node "collapses" and returns an
+     * empty node.
+     */
     @Override
-    public BintreeNode insert(AirObject obj, int x, int y, int z,
-        int xWid, int yWid, int zWid, int depth) {
-
-        // 1. Add the object to the list.
-        objects.add(obj);
-
-        // 2. Check if we need to split.
-        //    Rule: "splits if it contains more than three boxes" (size > 3)
-        if (objects.size() > MAX_OBJECTS) { // size is 4 or more
-            
-            // 3. Check the exception rule:
-            //    "...unless all of the boxes have a non-empty intersection box"
-            if (!checkAllIntersect()) {
-                // 4a. We must split.
-                InternalNode newInternal = new InternalNode();
-                
-                // 4b. Re-insert all objects *from this node* (including the
-                //     new one we just added) into the new internal node.
-                for (int i = 0; i < objects.size(); i++) {
-                    newInternal.insert(objects.get(i), x, y, z,
-                        xWid, yWid, zWid, depth);
-                }
-                
-                // 4c. Return the new internal node to replace this leaf.
-                return newInternal;
-            }
-            // 4d. If all objects *do* intersect, we don't split.
-            //     Just fall through and return 'this'.
-        }
-        
-        // 5. If we didn't split (because size <= 3 OR
-        //    size > 3 and all objects intersect), just return ourselves.
-        return this;
-    }
-
-
-    @Override
-    public BintreeNode remove(AirObject obj, int x, int y, int z,
+    public BintreeNode remove(
+        AirObject obj, int x, int y, int z,
         int xWid, int yWid, int zWid, int depth) {
         
-        // 1-3. Find and remove the object.
-        objects.remove(obj);
-        
-        // 4. Check if this node is now empty.
-        if (objects.size() == 0) {
-            // 5. If it is, return the Flyweight EmptyNode.
+        this.objects.remove(obj);
+
+        // If this was the last object, this node becomes empty
+        if (this.objects.size() == 0) {
+            // Use the Flyweight instance
             return EmptyNode.getInstance();
         }
-        
-        // 6. Otherwise, return this.
+
+        // Otherwise, this node remains
         return this;
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * Appends the string representation of this data node
+     * and all objects it contains.
+     */
     @Override
-    public int print(StringBuilder sb, int x, int y, int z,
+    public int print(
+        StringBuilder sb, int x, int y, int z,
         int xWid, int yWid, int zWid, int depth) {
-
-        // 1-6. Print header
-        sb.append(indent(depth));
-        sb.append("Leaf with ").append(objects.size()).append(" objects (");
-        sb.append(x).append(", ").append(y).append(", ").append(z);
-        sb.append(", ");
-        // Use the new region dimensions
-        sb.append(xWid).append(", ").append(yWid).append(", ").append(zWid);
-        sb.append(") ");
-        sb.append(depth);
-        sb.append("\n");
         
-        // 7. Loop through all objects
-        String objIndent = indent(depth + 1);
-        for (int i = 0; i < objects.size(); i++) {
-            sb.append(objIndent);
-            sb.append("(").append(objects.get(i).toString()).append(")\n");
+        // Append indentation
+        String indent = "  ".repeat(depth);
+        sb.append(indent);
+        
+        // Print node marker
+        sb.append("Node at ");
+        sb.append(x).append(" ");
+        sb.append(y).append(" ");
+        sb.append(z).append(", size ");
+        sb.append(xWid).append(" ");
+        sb.append(yWid).append(" ");
+        sb.append(zWid).append(":\n");
+
+        // Print all objects
+        for (int i = 0; i < this.objects.size(); i++) {
+            sb.append(indent).append("  "); // Extra indent for objects
+            sb.append(this.objects.get(i).toString()); // Assumes a useful toString()
+            sb.append("\n");
         }
         
-        return 1; // This is 1 node.
+        // This is one node
+        return 1;
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * Checks for all pairwise collisions within this node's list.
+     */
     @Override
-    public void collisions(StringBuilder sb, int x, int y, int z,
+    public void collisions(
+        StringBuilder sb, int x, int y, int z,
         int xWid, int yWid, int zWid, int depth) {
         
-        // 1. Print the "In leaf node..." header
-        sb.append(indent(depth));
-        sb.append("In leaf node (");
-        sb.append(x).append(", ").append(y).append(", ").append(z);
-        sb.append(", ");
-        // Use the new region dimensions
-        sb.append(xWid).append(", ").append(yWid).append(", ").append(zWid);
-        sb.append(") ");
-        sb.append(depth);
-        sb.append("\n");
-        
-        // 2. Iterate through all pairs of objects
-        String objIndent = indent(depth + 1);
-        for (int i = 0; i < objects.size(); i++) {
-            for (int j = i + 1; j < objects.size(); j++) {
-                AirObject obj1 = objects.get(i);
-                AirObject obj2 = objects.get(j);
+        // Use a nested loop to check every unique pair
+        for (int i = 0; i < this.objects.size(); i++) {
+            AirObject obj1 = this.objects.get(i);
+            
+            for (int j = i + 1; j < this.objects.size(); j++) {
+                AirObject obj2 = this.objects.get(j);
                 
-                if (obj1.intersects(obj2)) {
-                    // 3. If they intersect, format the output
-                    sb.append(objIndent);
-                    sb.append("(").append(obj1.toString()).append(")");
-                    sb.append(" and ");
-                    sb.append("(").append(obj2.toString()).append(")\n");
+                // Check if the two objects intersect
+                if (boxesIntersect(obj1, obj2)) {
+                    // Append the collision pair
+                    sb.append("Collision between ");
+                    sb.append(obj1.getName()).append(" and ");
+                    sb.append(obj2.getName()).append("\n");
                 }
             }
         }
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * Finds all objects in this node that intersect
+     * with the given query box.
+     */
     @Override
     public int intersect(
         StringBuilder sb,
         int qx, int qy, int qz, int qxwid, int qywid, int qzwid,
         int x, int y, int z, int xWid, int yWid, int zWid, int depth) {
-            
-        // 1. Print the "In leaf node..." header
-        sb.append(indent(depth));
-        sb.append("In leaf node (");
-        sb.append(x).append(", ").append(y).append(", ").append(z);
-        sb.append(", ");
-        // Use the new region dimensions
-        sb.append(xWid).append(", ").append(yWid).append(", ").append(zWid);
-        sb.append(") ");
-        sb.append(depth);
-        sb.append("\n");
         
-        // 2. Iterate through all objects
-        String objIndent = indent(depth + 1);
-        for (int i = 0; i < objects.size(); i++) {
-            AirObject obj = objects.get(i);
+        // Check every object in this node
+        for (int i = 0; i < this.objects.size(); i++) {
+            AirObject obj = this.objects.get(i);
             
-            // 3. Check if object intersects the query box
-            if (obj.intersects(qx, qy, qz, qxwid, qywid, qzwid)) {
-                // 4. If it does, print the object's toString
-                sb.append(objIndent);
-                sb.append(obj.toString());
-                sb.append("\n");
+            // Check if the object's box intersects the query box
+            if (boxIntersectsQuery(obj, qx, qy, qz, qxwid, qywid, qzwid)) {
+                // Append the object's info
+                sb.append("Found: ").append(obj.toString()).append("\n");
             }
         }
-        return 1; // Visited this 1 node
+        
+        // This node was visited
+        return 1;
+    }
+
+    // --- HELPER METHODS ---
+
+    /**
+     * Checks if all objects in this node have a common,
+     * [cite_start]non-empty intersection box. [cite: 38]
+     *
+     * @return true if all objects intersect at a common point, false otherwise.
+     */
+    private boolean checkAllIntersect() {
+        if (this.objects.size() == 0) {
+            return true; // Vacuously true
+        }
+
+        // Start with the bounds of the first object
+        AirObject first = this.objects.get(0);
+        int ix = first.getXorig();
+        int iy = first.getYorig();
+        int iz = first.getZorig();
+        int ixw = first.getXwidth();
+        int iyw = first.getYwidth();
+        int izw = first.getZwidth();
+
+        // Loop through the rest of the objects
+        for (int i = 1; i < this.objects.size(); i++) {
+            AirObject current = this.objects.get(i);
+
+            // Calculate the new intersection box
+            int nx = Math.max(ix, current.getXorig());
+            int ny = Math.max(iy, current.getYorig());
+            int nz = Math.max(iz, current.getZorig());
+
+            int nxw = Math.min(ix + ixw, current.getXorig() + current.getXwidth())
+                - nx;
+            int nyw = Math.min(iy + iyw, current.getYorig() + current.getYwidth())
+                - ny;
+            int nzw = Math.min(iz + izw, current.getZorig() + current.getZwidth())
+                - nz;
+
+            // Check if the intersection is empty
+            if (nxw <= 0 || nyw <= 0 || nzw <= 0) {
+                return false; // No common intersection
+            }
+
+            // Update the intersection box for the next iteration
+            ix = nx;
+            iy = ny;
+            iz = nz;
+            ixw = nxw;
+            iyw = nyw;
+            izw = nzw;
+        }
+
+        // If we got here, a non-empty intersection box exists for all objects
+        return true;
+    }
+
+
+    /**
+     * Helper method to check if two AirObjects intersect.
+     * [cite_start]Per spec, adjacent faces are not an intersection. [cite: 40-41]
+     */
+    private boolean boxesIntersect(AirObject o1, AirObject o2) {
+        // Check for non-overlap on any single axis
+        boolean noOverlap =
+            // o1 is to the left of o2
+            (o1.getXorig() + o1.getXwidth() <= o2.getXorig()) ||
+            // o1 is to the right of o2
+            (o1.getXorig() >= o2.getXorig() + o2.getXwidth()) ||
+            // o1 is below o2
+            (o1.getYorig() + o1.getYwidth() <= o2.getYorig()) ||
+            // o1 is above o2
+            (o1.getYorig() >= o2.getYorig() + o2.getYwidth()) ||
+            // o1 is behind o2
+            (o1.getZorig() + o1.getZwidth() <= o2.getZorig()) ||
+            // o1 is in front of o2
+            (o1.getZorig() >= o2.getZorig() + o2.getZwidth());
+        
+        // If there is no-overlap, they don't intersect.
+        // Otherwise, they must overlap.
+        return !noOverlap;
+    }
+
+
+    /**
+     * Helper method to check if an AirObject intersects a query box.
+     */
+    private boolean boxIntersectsQuery(
+        AirObject obj,
+        int qx, int qy, int qz, int qxwid, int qywid, int qzwid) {
+        
+        // Check for non-overlap on any single axis
+        boolean noOverlap =
+            // obj is to the left of query
+            (obj.getXorig() + obj.getXwidth() <= qx) ||
+            // obj is to the right of query
+            (obj.getXorig() >= qx + qxwid) ||
+            // obj is below query
+            (obj.getYorig() + obj.getYwidth() <= qy) ||
+            // obj is above query
+            (obj.getYorig() >= qy + qywid) ||
+            // obj is behind query
+            (obj.getZorig() + obj.getZwidth() <= qz) ||
+            // obj is in front of query
+            (obj.getZorig() >= qz + qzwid);
+        
+        return !noOverlap;
     }
 }
