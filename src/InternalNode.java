@@ -19,38 +19,42 @@ public class InternalNode implements BintreeNode {
                               int xWid, int yWid, int zWid, int depth) {
         
         int axis = depth % 3; // 0=x, 1=y, 2=z
+        int newDepth = depth + 1;
         
         if (axis == 0) { // X split
             int half = xWid / 2;
             if (obj.intersects(x, y, z, half, yWid, zWid)) {
                 left = left.insert(obj, x, y, z, half, yWid, zWid, 
-                                   depth + 1);
+                		newDepth);
             }
-            if (obj.intersects(x + half, y, z, half, yWid, zWid)) {
-                right = right.insert(obj, x + half, y, z, half, yWid, zWid, 
-                                     depth + 1);
+            int newX = x + half;
+            if (obj.intersects(newX, y, z, half, yWid, zWid)) {
+                right = right.insert(obj, newX, y, z, half, yWid, zWid, 
+                		newDepth);
             }
         } 
         else if (axis == 1) { // Y split
             int half = yWid / 2;
             if (obj.intersects(x, y, z, xWid, half, zWid)) {
                 left = left.insert(obj, x, y, z, xWid, half, zWid, 
-                                   depth + 1);
+                		newDepth);
             }
-            if (obj.intersects(x, y + half, z, xWid, half, zWid)) {
-                right = right.insert(obj, x, y + half, z, xWid, half, zWid, 
-                                     depth + 1);
+            int newY = y + half;
+            if (obj.intersects(x, newY, z, xWid, half, zWid)) {
+                right = right.insert(obj, x, newY, z, xWid, half, zWid, 
+                		newDepth);
             }
         } 
         else { // Z split
             int half = zWid / 2;
             if (obj.intersects(x, y, z, xWid, yWid, half)) {
                 left = left.insert(obj, x, y, z, xWid, yWid, half, 
-                                   depth + 1);
+                		newDepth);
             }
-            if (obj.intersects(x, y, z + half, xWid, yWid, half)) {
-                right = right.insert(obj, x, y, z + half, xWid, yWid, half, 
-                                     depth + 1);
+            int newZ = z + half;
+            if (obj.intersects(x, y, newZ, xWid, yWid, half)) {
+                right = right.insert(obj, x, y, newZ, xWid, yWid, half, 
+                		newDepth);
             }
         }
         
@@ -61,38 +65,42 @@ public class InternalNode implements BintreeNode {
     public BintreeNode remove(AirObject obj, int x, int y, int z,
                               int xWid, int yWid, int zWid, int depth) {
         int axis = depth % 3;
+        int newDepth = depth + 1;
         
         if (axis == 0) { // X split
             int half = xWid / 2;
             if (obj.intersects(x, y, z, half, yWid, zWid)) {
                 left = left.remove(obj, x, y, z, half, yWid, zWid, 
-                                  depth + 1);
+                		newDepth);
             }
-            if (obj.intersects(x + half, y, z, half, yWid, zWid)) {
-                right = right.remove(obj, x + half, y, z, half, yWid, zWid, 
-                                     depth + 1);
+            int newX = x + half;
+            if (obj.intersects(newX, y, z, half, yWid, zWid)) {
+                right = right.remove(obj, newX, y, z, half, yWid, zWid, 
+                		newDepth);
             }
         } 
         else if (axis == 1) { // Y split
             int half = yWid / 2;
             if (obj.intersects(x, y, z, xWid, half, zWid)) {
                 left = left.remove(obj, x, y, z, xWid, half, zWid, 
-                                  depth + 1);
+                		newDepth);
             }
-            if (obj.intersects(x, y + half, z, xWid, half, zWid)) {
-                right = right.remove(obj, x, y + half, z, xWid, half, zWid, 
-                                     depth + 1);
+            int newY = y + half;
+            if (obj.intersects(x, newY, z, xWid, half, zWid)) {
+                right = right.remove(obj, x, newY, z, xWid, half, zWid, 
+                		newDepth);
             }
         } 
         else { // Z split
             int half = zWid / 2;
             if (obj.intersects(x, y, z, xWid, yWid, half)) {
                 left = left.remove(obj, x, y, z, xWid, yWid, half, 
-                                  depth + 1);
+                		newDepth);
             }
-            if (obj.intersects(x, y, z + half, xWid, yWid, half)) {
-                right = right.remove(obj, x, y, z + half, xWid, yWid, half, 
-                                     depth + 1);
+            int newZ = z + half;
+            if (obj.intersects(x, y, newZ, xWid, yWid, half)) {
+                right = right.remove(obj, x, y, newZ, xWid, yWid, half, 
+                		newDepth);
             }
         }
 
@@ -202,23 +210,24 @@ public class InternalNode implements BintreeNode {
         
         int count = 1;
         int axis = depth % 3;
+        int newDepth = depth + 1;
         if (axis == 0) {
             int half = xWid / 2;
-            count += left.print(sb, x, y, z, half, yWid, zWid, depth + 1);
+            count += left.print(sb, x, y, z, half, yWid, zWid, newDepth);
             count += right.print(sb, x + half, y, z, half, yWid, zWid, 
-                                 depth + 1);
+            		newDepth);
         } 
         else if (axis == 1) {
             int half = yWid / 2;
-            count += left.print(sb, x, y, z, xWid, half, zWid, depth + 1);
+            count += left.print(sb, x, y, z, xWid, half, zWid, newDepth);
             count += right.print(sb, x, y + half, z, xWid, half, zWid, 
-                                 depth + 1);
+            		newDepth);
         } 
         else {
             int half = zWid / 2;
-            count += left.print(sb, x, y, z, xWid, yWid, half, depth + 1);
+            count += left.print(sb, x, y, z, xWid, yWid, half, newDepth);
             count += right.print(sb, x, y, z + half, xWid, yWid, half, 
-                                 depth + 1);
+            		newDepth);
         }
         return count;
     }
@@ -227,23 +236,24 @@ public class InternalNode implements BintreeNode {
     public void collisions(StringBuilder sb, int x, int y, int z,
                            int xWid, int yWid, int zWid, int depth) {
         int axis = depth % 3;
+        int newDepth = depth + 1;
         if (axis == 0) {
             int half = xWid / 2;
-            left.collisions(sb, x, y, z, half, yWid, zWid, depth + 1);
+            left.collisions(sb, x, y, z, half, yWid, zWid, newDepth);
             right.collisions(sb, x + half, y, z, half, yWid, zWid, 
-                             depth + 1);
+            		newDepth);
         } 
         else if (axis == 1) {
             int half = yWid / 2;
-            left.collisions(sb, x, y, z, xWid, half, zWid, depth + 1);
+            left.collisions(sb, x, y, z, xWid, half, zWid, newDepth);
             right.collisions(sb, x, y + half, z, xWid, half, zWid, 
-                             depth + 1);
+            		newDepth);
         } 
         else {
             int half = zWid / 2;
-            left.collisions(sb, x, y, z, xWid, yWid, half, depth + 1);
+            left.collisions(sb, x, y, z, xWid, yWid, half, newDepth);
             right.collisions(sb, x, y, z + half, xWid, yWid, half, 
-                             depth + 1);
+            		newDepth);
         }
     }
 
@@ -261,6 +271,7 @@ public class InternalNode implements BintreeNode {
 
         int visited = 1;
         int axis = depth % 3;
+        int newDepth = depth + 1;
         
         if (axis == 0) {
             int half = xWid / 2;
@@ -268,13 +279,13 @@ public class InternalNode implements BintreeNode {
                              yWid, zWid)) {
                 visited += left.intersect(sb, qx, qy, qz, qxwid, qywid, qzwid, 
                                          x, y, z, half, yWid, zWid, 
-                                         depth + 1);
+                                         newDepth);
             }
             if (boxesOverlap(qx, qy, qz, qxwid, qywid, qzwid, x + half, y, z, 
                              half, yWid, zWid)) {
                 visited += right.intersect(sb, qx, qy, qz, qxwid, qywid, qzwid, 
                                           x + half, y, z, half, yWid, zWid, 
-                                          depth + 1);
+                                          newDepth);
             }
         } 
         else if (axis == 1) {
@@ -283,13 +294,13 @@ public class InternalNode implements BintreeNode {
                              half, zWid)) {
                 visited += left.intersect(sb, qx, qy, qz, qxwid, qywid, qzwid, 
                                          x, y, z, xWid, half, zWid, 
-                                         depth + 1);
+                                         newDepth);
             }
             if (boxesOverlap(qx, qy, qz, qxwid, qywid, qzwid, x, y + half, z, 
                              xWid, half, zWid)) {
                 visited += right.intersect(sb, qx, qy, qz, qxwid, qywid, qzwid, 
                                           x, y + half, z, xWid, half, zWid, 
-                                          depth + 1);
+                                          newDepth);
             }
         } 
         else {
@@ -298,13 +309,13 @@ public class InternalNode implements BintreeNode {
                              yWid, half)) {
                 visited += left.intersect(sb, qx, qy, qz, qxwid, qywid, qzwid, 
                                          x, y, z, xWid, yWid, half, 
-                                         depth + 1);
+                                         newDepth);
             }
             if (boxesOverlap(qx, qy, qz, qxwid, qywid, qzwid, x, y, z + half, 
                              xWid, yWid, half)) {
                 visited += right.intersect(sb, qx, qy, qz, qxwid, qywid, qzwid, 
                                           x, y, z + half, xWid, yWid, half, 
-                                          depth + 1);
+                                          newDepth);
             }
         }
         
