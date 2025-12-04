@@ -18,7 +18,6 @@ public class SkipList<K extends Comparable<K>, V> {
     private int size;
     private Random rnd;
     private static final int MAX_LEVEL = 10;
-    private static final double P = 0.5;
 
     /**
      * Represents a node in the Skip List.
@@ -49,9 +48,17 @@ public class SkipList<K extends Comparable<K>, V> {
     public int level() { return level; }
     public int size() { return size; }
 
+    /**
+     * Generates a random level for a new node.
+     * Uses the integer parity check (nextInt() % 2 == 0) to match
+     * the standard reference implementation behavior.
+     * @return The random level (1 to MAX_LEVEL).
+     */
     private int randomLevel() {
         int lev = 1;
-        while (lev < MAX_LEVEL && rnd.nextDouble() < P) {
+        // Using (rnd.nextInt() % 2 == 0) is the standard OpenDSA/Textbook
+        // way to simulate a coin flip for Skip Lists in Java.
+        while (lev < MAX_LEVEL && (rnd.nextInt() % 2) == 0) {
             lev++;
         }
         return lev;
@@ -60,11 +67,7 @@ public class SkipList<K extends Comparable<K>, V> {
     @SuppressWarnings("unchecked")
     public void insert(K key, V value) {
         int newLevel = randomLevel();
-
-        if (newLevel > level) {
-            level = newLevel;
-        }
-
+        
         SkipNode<K, V>[] update = (SkipNode<K, V>[])new SkipNode[MAX_LEVEL];
         SkipNode<K, V> x = head;
 
@@ -76,13 +79,13 @@ public class SkipList<K extends Comparable<K>, V> {
             }
             update[i] = x;
         }
-        
-        // FIX: Ensure update array is populated for levels higher than the old level
-        // Since head points to null at these new levels, head is the predecessor.
-        for (int i = 0; i < newLevel; i++) {
-            if (update[i] == null) {
+
+        // Adjust head if new node is taller than current max level
+        if (newLevel > level) {
+            for (int i = level; i < newLevel; i++) {
                 update[i] = head;
             }
+            level = newLevel;
         }
 
         SkipNode<K, V> newNode = new SkipNode<>(key, value, newLevel);
@@ -122,6 +125,7 @@ public class SkipList<K extends Comparable<K>, V> {
 
         size--;
 
+        // Decrease level if the highest level is now empty
         while (level > 1 && head.forward[level - 1] == null) {
             level--;
         }

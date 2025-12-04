@@ -31,7 +31,7 @@ public class AirControlTest extends TestCase {
      * Test syntax: Sample Input/Output
      *
      * @throws Exception
-     *
+     */
     public void testSampleInput() throws Exception {
         Random rnd = new Random();
         rnd.setSeed(0xCAFEBEEF);
@@ -117,7 +117,7 @@ public class AirControlTest extends TestCase {
                 + "5 nodes were visited in the bintree\r\n",
                 w.intersect(0, 0, 0, 1024, 1024, 1024));
     }
-*/
+
 
 
     // ----------------------------------------------------------

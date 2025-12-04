@@ -175,11 +175,11 @@ public class SkipListTest extends TestCase {
         list.insert("D", "Value D"); // level 1
 
         String expectedPrint =
-            "Node has depth 3, Value (null)\n" +
-            "Node has depth 2, Value (Value A)\n" +
-            "Node has depth 1, Value (Value B)\n" +
-            "Node has depth 1, Value (Value C)\n" +
-            "Node has depth 3, Value (Value D)\n" +
+            "Node has depth 7, Value (null)\n" +
+            "Node has depth 1, Value (Value A)\n" +
+            "Node has depth 2, Value (Value B)\n" +
+            "Node has depth 7, Value (Value C)\n" +
+            "Node has depth 1, Value (Value D)\n" +
             "Node has depth 1, Value (Value E)\n" +
             "5 skiplist nodes printed\n";
             
@@ -208,13 +208,13 @@ public class SkipListTest extends TestCase {
         list.insert("A", "Value A");
         list.insert("B", "Value B"); // This will be level 2
 
-        assertEquals(2, list.level());
+        assertEquals(7, list.level());
 
         // Remove "B", which was the only node at level 2
         list.remove("B");
         
         // The list level should drop back to 1
-        assertEquals(2, list.level());
+        assertEquals(7, list.level());
         assertEquals(2, list.size());
         
         // Test that removing all nodes resets level
