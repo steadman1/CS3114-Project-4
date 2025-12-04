@@ -158,7 +158,8 @@ public class SkipList<K extends Comparable<K>, V> {
         int nodeCount = 0;
         while (curr != null) {
             sb.append("Node has depth ").append(curr.forward.length);
-            sb.append(", Value (").append(curr.value().toString()).append(")\n");
+            sb.append(", Value (").append(
+                curr.value().toString()).append(")\n");
             curr = curr.forward[0];
             nodeCount++;
         }
@@ -169,7 +170,8 @@ public class SkipList<K extends Comparable<K>, V> {
     public String range(K start, K end) {
         StringBuilder sb = new StringBuilder();
         sb.append("Found these records in the range ");
-        sb.append(start.toString()).append(" to ").append(end.toString()).append("\n");
+        sb.append(start.toString()).append(" to ").append(
+            end.toString()).append("\n");
         SkipNode<K, V> x = head;
         for (int i = level - 1; i >= 0; i--) {
             while ((x.forward[i] != null) &&

@@ -93,13 +93,16 @@ public class WorldDB implements ATC {
     }
 
     public String intersect(int x, int y, int z, int xwid, int ywid, int zwid) {
-        if (x < 0 || x >= worldSize || y < 0 || y >= worldSize || z < 0 || z >= worldSize) {
+        if (x < 0 || x >= worldSize || y < 0 || y >= worldSize || 
+            z < 0 || z >= worldSize) {
             return null;
         }
-        if (xwid <= 0 || xwid > worldSize || ywid <= 0 || ywid > worldSize || zwid <= 0 || zwid > worldSize) {
+        if (xwid <= 0 || xwid > worldSize || ywid <= 0 || 
+            ywid > worldSize || zwid <= 0 || zwid > worldSize) {
             return null;
         }
-        if (x + xwid > worldSize || y + ywid > worldSize || z + zwid > worldSize) {
+        if (x + xwid > worldSize || y + ywid > worldSize || 
+            z + zwid > worldSize) {
             return null;
         }
 
@@ -118,10 +121,12 @@ public class WorldDB implements ATC {
         int yw = a.getYwidth();
         int zw = a.getZwidth();
 
-        if (x < 0 || x >= worldSize || y < 0 || y >= worldSize || z < 0 || z >= worldSize) {
+        if (x < 0 || x >= worldSize || y < 0 || 
+            y >= worldSize || z < 0 || z >= worldSize) {
             return false;
         }
-        if (xw <= 0 || xw > worldSize || yw <= 0 || yw > worldSize || zw <= 0 || zw > worldSize) {
+        if (xw <= 0 || xw > worldSize || yw <= 0 || 
+            yw > worldSize || zw <= 0 || zw > worldSize) {
             return false;
         }
 
@@ -132,7 +137,8 @@ public class WorldDB implements ATC {
         try {
             if (a instanceof AirPlane) {
                 AirPlane p = (AirPlane) a;
-                if (p.getCarrier() == null || p.getFlightNum() <= 0 || p.getNumEngines() <= 0) {
+                if (p.getCarrier() == null || p.getFlightNum() <= 0 || 
+                p.getNumEngines() <= 0) {
                     return false;
                 }
             } 

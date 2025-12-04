@@ -30,13 +30,15 @@ public class LeafNode implements BintreeNode {
 
         // Split condition: > 3 objects
         if (data.size() > 3) {
-            // Exception: Do not split if ALL objects intersect each other's bounding boxes
+            // Exception: Do not split if ALL objects intersect each other's 
+            // bounding boxes
             if (!allIntersect()) {
                 // Split required
                 InternalNode newInternal = new InternalNode();
                 // Re-insert all objects into the new internal node
                 for (int i = 0; i < data.size(); i++) {
-                    newInternal.insert(data.get(i), x, y, z, xWid, yWid, zWid, depth);
+                    newInternal.insert(data.get(i), x, y, z, 
+                                       xWid, yWid, zWid, depth);
                 }
                 return newInternal;
             }
@@ -49,7 +51,9 @@ public class LeafNode implements BintreeNode {
      * @return True if they all intersect, false otherwise.
      */
     private boolean allIntersect() {
-        if (data.size() == 0) return false;
+        if (data.size() == 0) {
+            return false;
+        }
         
         AirObject first = data.get(0);
         int ix = first.getXorig();
@@ -66,9 +70,12 @@ public class LeafNode implements BintreeNode {
             int maxY = Math.max(iy, curr.getYorig());
             int maxZ = Math.max(iz, curr.getZorig());
             
-            int minX2 = Math.min(ix + ixw, curr.getXorig() + curr.getXwidth());
-            int minY2 = Math.min(iy + iyw, curr.getYorig() + curr.getYwidth());
-            int minZ2 = Math.min(iz + izw, curr.getZorig() + curr.getZwidth());
+            int minX2 = Math.min(ix + ixw, 
+                                 curr.getXorig() + curr.getXwidth());
+            int minY2 = Math.min(iy + iyw, 
+                                 curr.getYorig() + curr.getYwidth());
+            int minZ2 = Math.min(iz + izw, 
+                                 curr.getZorig() + curr.getZwidth());
             
             if (maxX >= minX2 || maxY >= minY2 || maxZ >= minZ2) {
                 return false; // No overlap
@@ -97,26 +104,30 @@ public class LeafNode implements BintreeNode {
     @Override
     public int print(StringBuilder sb, int x, int y, int z,
                      int xWid, int yWid, int zWid, int depth) {
-        for (int i = 0; i < depth; i++) sb.append("  ");
+        for (int i = 0; i < depth; i++) {
+            sb.append("  ");
+        }
         
         sb.append("Leaf with ").append(data.size()).append(" objects (");
-        sb.append(x).append(", ").append(y).append(", ").append(z).append(", ");
-        sb.append(xWid).append(", ").append(yWid).append(", ").append(zWid).append(") ");
+        sb.append(x).append(", ").append(y).append(", ").append(z)
+          .append(", ");
+        sb.append(xWid).append(", ").append(yWid).append(", ")
+          .append(zWid).append(") ");
         sb.append(depth).append("\n");
 
         // 1. Copy to Array
         AirObject[] items = new AirObject[data.size()];
-        for(int i = 0; i < data.size(); i++) {
+        for (int i = 0; i < data.size(); i++) {
             items[i] = data.get(i);
         }
 
         // 2. Sort Array (Alphabetical)
-        for(int i = 0; i < items.length - 1; i++) {
-            for(int j = 0; j < items.length - i - 1; j++) {
-                if(items[j].compareTo(items[j+1]) > 0) {
+        for (int i = 0; i < items.length - 1; i++) {
+            for (int j = 0; j < items.length - i - 1; j++) {
+                if (items[j].compareTo(items[j + 1]) > 0) {
                     AirObject temp = items[j];
-                    items[j] = items[j+1];
-                    items[j+1] = temp;
+                    items[j] = items[j + 1];
+                    items[j + 1] = temp;
                 }
             }
         }
@@ -124,7 +135,9 @@ public class LeafNode implements BintreeNode {
         // 3. Print Sorted Array
         for (int i = 0; i < items.length; i++) {
             AirObject obj = items[i];
-            for (int j = 0; j < depth; j++) sb.append("  ");
+            for (int j = 0; j < depth; j++) {
+                sb.append("  ");
+            }
             sb.append("(").append(obj.toString()).append(")\n");
         }
         return 1;
@@ -134,8 +147,10 @@ public class LeafNode implements BintreeNode {
     public void collisions(StringBuilder sb, int x, int y, int z,
                            int xWid, int yWid, int zWid, int depth) {
         // FIX 1: Print header unconditionally (outside the loop)
-        sb.append("In leaf node (").append(x).append(", ").append(y).append(", ").append(z);
-        sb.append(", ").append(xWid).append(", ").append(yWid).append(", ").append(zWid);
+        sb.append("In leaf node (").append(x).append(", ").append(y)
+          .append(", ").append(z);
+        sb.append(", ").append(xWid).append(", ").append(yWid).append(", ")
+          .append(zWid);
         sb.append(") ").append(depth).append("\n");
 
         for (int i = 0; i < data.size() - 1; i++) {
@@ -153,9 +168,14 @@ public class LeafNode implements BintreeNode {
                         iz >= z && iz < z + zWid) {
                         
                         if (a.compareTo(b) <= 0) {
-                            sb.append("(").append(a.toString()).append(") and (").append(b.toString()).append(")\n");
-                        } else {
-                            sb.append("(").append(b.toString()).append(") and (").append(a.toString()).append(")\n");
+                            sb.append("(").append(a.toString())
+                              .append(") and (")
+                              .append(b.toString()).append(")\n");
+                        } 
+                        else {
+                            sb.append("(").append(b.toString())
+                              .append(") and (")
+                              .append(a.toString()).append(")\n");
                         }
                     }
                 }
@@ -166,11 +186,15 @@ public class LeafNode implements BintreeNode {
     @Override
     public int intersect(StringBuilder sb, int qx, int qy, int qz,
                          int qxwid, int qywid, int qzwid,
-                         int x, int y, int z, int xWid, int yWid, int zWid, int depth) {
+                         int x, int y, int z, int xWid, int yWid, int zWid, 
+                         int depth) {
         
-        // FIX 2: Print header unconditionally because InternalNode called us (so we are visited)
-        sb.append("In leaf node (").append(x).append(", ").append(y).append(", ").append(z);
-        sb.append(", ").append(xWid).append(", ").append(yWid).append(", ").append(zWid);
+        // FIX 2: Print header unconditionally because InternalNode called us 
+        // (so we are visited)
+        sb.append("In leaf node (").append(x).append(", ").append(y)
+          .append(", ").append(z);
+        sb.append(", ").append(xWid).append(", ").append(yWid).append(", ")
+          .append(zWid);
         sb.append(") ").append(depth).append("\n");
 
         AirObject[] matches = new AirObject[data.size()];
@@ -184,7 +208,8 @@ public class LeafNode implements BintreeNode {
                 
                 // FIX 3: Check 2 (Duplicate Avoidance)
                 // Only print if the object's origin is strictly within THIS node
-                // This prevents printing the same object multiple times if it spans leaves
+                // This prevents printing the same object multiple times if it 
+                // spans leaves
                 if (obj.getXorig() >= x && obj.getXorig() < x + xWid &&
                     obj.getYorig() >= y && obj.getYorig() < y + yWid &&
                     obj.getZorig() >= z && obj.getZorig() < z + zWid) {
@@ -198,10 +223,10 @@ public class LeafNode implements BintreeNode {
             // Sort Array (Alphabetical)
             for (int i = 0; i < count - 1; i++) {
                 for (int j = 0; j < count - i - 1; j++) {
-                    if (matches[j].compareTo(matches[j+1]) > 0) {
+                    if (matches[j].compareTo(matches[j + 1]) > 0) {
                         AirObject temp = matches[j];
-                        matches[j] = matches[j+1];
-                        matches[j+1] = temp;
+                        matches[j] = matches[j + 1];
+                        matches[j + 1] = temp;
                     }
                 }
             }
@@ -212,6 +237,6 @@ public class LeafNode implements BintreeNode {
             }
         }
         
-        return 1; 
+        return 1;
     }
 }
