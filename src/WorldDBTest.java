@@ -417,7 +417,7 @@ public class WorldDBTest extends TestCase {
         
         // Also run collisions/intersect on this deep structure to cover Z-axis recursion
         assertNotNull(db.collisions());
-        assertNotNull(db.intersect(0,0,0, 1024,1024,1024));
+        assertNotNull(db.intersect(0, 0, 0, 1024, 1024, 1024));
     }
 
     /**

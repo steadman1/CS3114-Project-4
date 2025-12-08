@@ -138,7 +138,7 @@ public class WorldDB implements ATC {
             if (a instanceof AirPlane) {
                 AirPlane p = (AirPlane) a;
                 if (p.getCarrier() == null || p.getFlightNum() <= 0 || 
-                p.getNumEngines() <= 0) {
+                		p.getNumEngines() <= 0) {
                     return false;
                 }
             } 

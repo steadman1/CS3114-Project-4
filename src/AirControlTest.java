@@ -363,55 +363,176 @@ public class AirControlTest extends TestCase {
     /**
      * Test 2: Verify Geometry Math Logic for Intersection box.
      * Specifically kills "Addition instead of Subtraction" mutants in calculating ixw/iyw/izw.
-     * * Scenario:
-     * A: (0,0,0) w10. Range 0-10.
-     * B: (5,0,0) w10. Range 5-15.
-     * Intersection A&B: Start 5, End 10. Width = 5. (ixw = minX2(10) - ix(5) = 5).
-     * * C: (12,0,0) w10. Range 12-22.
-     * * Correct Logic:
-     * C (12) is outside A&B Intersection (5-10). Returns False (No common overlap).
-     * Result: Tree Splits.
-     * * Mutated Logic (ixw = minX2 + ix):
-     * ixw = 10 + 5 = 15.
-     * Next Iteration Box: Start 5, End 5+15=20.
-     * C (12) fits inside (5-20). Returns True (Overlap detected).
-     * Result: Tree Does NOT Split.
+     * This hits lines 87-89 in LeafNode.
      */
-    public void testLeafSplitMathMutation() {
-        // A
-        db.add(new AirPlane("A", 0, 0, 0, 10, 10, 10, "D", 1, 1));
-        // B overlaps A
-        db.add(new AirPlane("B", 5, 0, 0, 10, 10, 10, "D", 1, 1));
-        // C is outside A&B intersection, but inside "Mutated Large" intersection
+    public void testLeafIntersectionMathGeometry() {
+        // A (0-100)
+        db.add(new AirPlane("A", 0, 0, 0, 100, 10, 10, "D", 1, 1));
+        // B (10-110)
+        db.add(new AirPlane("B", 10, 0, 0, 100, 10, 10, "D", 1, 1));
+        
+        // Current intersection is 10-100 (width 90).
+        // ixw = minX2(100) - ix(10) = 90.
+        
+        // C (12-22). Fits inside 10-100.
         db.add(new AirPlane("C", 12, 0, 0, 10, 10, 10, "D", 1, 1));
+        
         // D (dummy) to trigger >3 check
-        db.add(new AirPlane("D", 200, 200, 200, 10, 10, 10, "D", 1, 1));
+        // Fixed: Placed D at 15 so it ALSO overlaps the intersection (12-22).
+        // If D was at 200, it wouldn't overlap, forcing a split and failing the test.
+        db.add(new AirPlane("D", 15, 0, 0, 10, 10, 10, "D", 1, 1));
         
         String tree = db.printbintree();
-        // Should contain Internal Node "I (" because they don't all overlap
-        // If mutation exists, it would be a single Leaf
-        assertTrue("Tree should split", tree.contains("I ("));
+        // If ixw calculated correctly, C & D overlap intersection of A&B.
+        // Result: Single Leaf.
+        // If ixw mutated (e.g. replaced with 0 or minX2), result logic changes.
+        assertTrue("Tree should be single leaf if intersection logic is correct", 
+            tree.contains("Leaf with 4 objects"));
+        assertFalse("Tree should NOT split", tree.contains("I ("));
     }
     
     /**
-     * Test 3: Verify positive case for allIntersect math.
-     * Ensures we didn't break valid logic while fixing mutation.
-     * A, B intersect (5-20). C (10-15) fits inside.
-     * Should be a single Leaf.
+     * Test 3: Verify Bubble Sort Swap Logic specifically.
+     * This forces a scenario where swapping is mandatory and checks strict order.
+     * Hits lines 126-130 in LeafNode.
      */
-    public void testLeafNoSplitMathLogic() {
-        // A: 0-20
-        db.add(new AirPlane("A", 0, 0, 0, 20, 10, 10, "D", 1, 1));
-        // B: 5-25. Intersect A&B is 5-20.
-        db.add(new AirPlane("B", 5, 0, 0, 20, 10, 10, "D", 1, 1));
-        // C: 10-15. Fits inside 5-20.
-        db.add(new AirPlane("C", 10, 0, 0, 5, 10, 10, "D", 1, 1));
-        // D: 11-12. Fits inside.
-        db.add(new AirPlane("D", 11, 0, 0, 1, 10, 10, "D", 1, 1));
+    public void testLeafBubbleSortSwapLogic() {
+        // We use names that are identical in length but clearly ordered.
+        db.add(new AirPlane("C", 10, 10, 10, 10, 10, 10, "D", 1, 1));
+        db.add(new AirPlane("B", 10, 10, 10, 10, 10, 10, "D", 1, 1));
+        db.add(new AirPlane("A", 10, 10, 10, 10, 10, 10, "D", 1, 1));
+        
+        String output = db.printbintree();
+        // The output should list them as A, B, C.
+        // If swap logic is broken (e.g. items[j] = items[j]), we get C, B, A or duplicates.
+        
+        int iA = output.indexOf("Airplane A");
+        int iB = output.indexOf("Airplane B");
+        int iC = output.indexOf("Airplane C");
+        
+        assertTrue("Output should contain A", iA != -1);
+        assertTrue("Output should contain B", iB != -1);
+        assertTrue("Output should contain C", iC != -1);
+        
+        // Verify strict inequality
+        assertTrue("A must come before B", iA < iB);
+        assertTrue("B must come before C", iB < iC);
+    }
+    
+    /**
+     * Test 4: Same geometry logic test but for MUTATION killing.
+     * With D at 15, the "Correct" code returns TRUE (No Split).
+     * The "Mutant" (ixw = minX2 + ix) makes box HUGE.
+     * D(15) fits in huge box too.
+     * This test is actually redundant with testLeafIntersectionMathGeometry
+     * but explicitly named to indicate purpose. 
+     * To truly KILL the mutant we need a scenario where:
+     * Correct -> FALSE (Split).
+     * Mutant -> TRUE (No Split).
+     */
+    public void testLeafSplitMathMutation() {
+        // A (0-100)
+        db.add(new AirPlane("A", 0, 0, 0, 100, 10, 10, "D", 1, 1));
+        // B overlaps A (5-105). Intersect 5-100.
+        db.add(new AirPlane("B", 5, 0, 0, 100, 10, 10, "D", 1, 1));
+        
+        // C (12-22). Fits.
+        db.add(new AirPlane("C", 12, 0, 0, 10, 10, 10, "D", 1, 1));
+        
+        // D at 15. Fits.
+        // Correct behavior: NO Split.
+        // If we want to kill mutant, we need D to be OUTSIDE correct box but INSIDE mutant box.
+        // A: 0-10. B: 5-15. Correct Intersect: 5-10.
+        // Mutant Intersect (Plus): 10+5 = 15 width. Range 5-20.
+        // C: 12. Outside 5-10. Inside 5-20.
+        // D: 15. Outside 5-10. Inside 5-20.
+        
+        // RE-SETUP for Mutation Killing:
+        db.clear();
+        db.add(new AirPlane("A", 0, 0, 0, 10, 10, 10, "D", 1, 1));
+        db.add(new AirPlane("B", 5, 0, 0, 10, 10, 10, "D", 1, 1));
+        // C fits in mutant (12 is < 20) but not correct (12 > 10)
+        db.add(new AirPlane("C", 12, 0, 0, 10, 10, 10, "D", 1, 1));
+        // D fits in mutant (15 is < 20) but not correct (15 > 10)
+        db.add(new AirPlane("D", 15, 0, 0, 10, 10, 10, "D", 1, 1));
         
         String tree = db.printbintree();
-        // Should be one leaf
-        assertTrue("Tree should NOT split", tree.contains("Leaf with 4 objects"));
-        assertFalse(tree.contains("I ("));
+        // Correct logic: Should SPLIT.
+        // Mutant logic: Should NOT split.
+        // Asserting SPLIT kills the mutant.
+        assertTrue("Tree should split", tree.contains("I ("));
+    }
+
+    /**
+     * Tests that an object spanning multiple nodes is reported exactly ONCE
+     * during an intersection query.
+     */
+    public void testIntersectDeduplication() {
+        // Object spans X split (512)
+        // x=500, width=50 -> range 500 to 550.
+        // Left Node (0-512), Right Node (512-1024).
+        db.add(new AirPlane("SpanX", 500, 10, 10, 50, 10, 10, "D", 1, 1));
+        
+        // Query covering the whole area
+        String res = db.intersect(0, 0, 0, 1024, 1024, 1024);
+        
+        // Count occurrences of "SpanX"
+        int count = 0;
+        int idx = 0;
+        while ((idx = res.indexOf("SpanX", idx)) != -1) {
+            count++;
+            idx += "SpanX".length();
+        }
+        
+        assertEquals("Object spanning nodes should be listed exactly once", 1, count);
+    }
+
+    /**
+     * Precision test for InternalNode intersect logic.
+     * Targets lines 279-297 in InternalNode (X and Y axis overlaps).
+     */
+    public void testIntersectGeometricPrecision() {
+        // Setup:
+        // Root (X-Split @ 512).
+        // Left Child (Y-Split @ 512).
+        
+        // Add objects to populate the tree structure
+        db.add(new AirPlane("LeftTop", 10, 10, 10, 10, 10, 10, "D", 1, 1));
+        db.add(new AirPlane("LeftBot", 10, 600, 10, 10, 10, 10, "D", 1, 1));
+        db.add(new AirPlane("RightTop", 600, 10, 10, 10, 10, 10, "D", 1, 1));
+        
+        // 1. Test X-Axis Left Child Overlap (Line 279)
+        // Query exactly matches Left region (0,0,0) to (512, 1024, 1024)
+        // boxesOverlap should return TRUE.
+        String res = db.intersect(0, 0, 0, 512, 1024, 1024);
+        assertTrue(res.contains("LeftTop"));
+        assertTrue(res.contains("LeftBot"));
+        assertFalse(res.contains("RightTop"));
+        
+        // 2. Test X-Axis Right Child Overlap (Line 285)
+        // Query exactly matches Right region (512,0,0) to (512, 1024, 1024)
+        // boxesOverlap should return TRUE.
+        res = db.intersect(512, 0, 0, 512, 1024, 1024);
+        assertFalse(res.contains("LeftTop"));
+        assertTrue(res.contains("RightTop"));
+        
+        // 3. Test Y-Axis Left Child Overlap (Line 294)
+        // Query restricted to X<512 (Left Node).
+        // Query Y from 0 to 512.
+        res = db.intersect(0, 0, 0, 512, 512, 1024);
+        assertTrue(res.contains("LeftTop"));
+        assertFalse(res.contains("LeftBot"));
+        
+        // 4. Test "Equality" / Boundary conditions
+        // A query ending exactly at 512 should NOT overlap the Right Node (starting at 512).
+        // Query X: 0 to 512 (width 512). Overlaps Left.
+        // Query X: 512 to 1024 (start 512). Overlaps Right.
+        
+        // Test query that ends at 511 (Just misses Right).
+        // x=0, w=511 -> range 0-511.
+        // Right starts 512. No overlap.
+        res = db.intersect(0, 0, 0, 511, 1024, 1024);
+        assertTrue(res.contains("LeftTop"));
+        assertFalse(res.contains("RightTop"));
     }
 }

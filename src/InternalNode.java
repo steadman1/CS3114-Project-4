@@ -25,36 +25,36 @@ public class InternalNode implements BintreeNode {
             int half = xWid / 2;
             if (obj.intersects(x, y, z, half, yWid, zWid)) {
                 left = left.insert(obj, x, y, z, half, yWid, zWid, 
-                		newDepth);
+                	newDepth);
             }
             int newX = x + half;
             if (obj.intersects(newX, y, z, half, yWid, zWid)) {
                 right = right.insert(obj, newX, y, z, half, yWid, zWid, 
-                		newDepth);
+                	newDepth);
             }
         } 
         else if (axis == 1) { // Y split
             int half = yWid / 2;
             if (obj.intersects(x, y, z, xWid, half, zWid)) {
                 left = left.insert(obj, x, y, z, xWid, half, zWid, 
-                		newDepth);
+                	newDepth);
             }
             int newY = y + half;
             if (obj.intersects(x, newY, z, xWid, half, zWid)) {
                 right = right.insert(obj, x, newY, z, xWid, half, zWid, 
-                		newDepth);
+                	newDepth);
             }
         } 
         else { // Z split
             int half = zWid / 2;
             if (obj.intersects(x, y, z, xWid, yWid, half)) {
                 left = left.insert(obj, x, y, z, xWid, yWid, half, 
-                		newDepth);
+                	newDepth);
             }
             int newZ = z + half;
             if (obj.intersects(x, y, newZ, xWid, yWid, half)) {
                 right = right.insert(obj, x, y, newZ, xWid, yWid, half, 
-                		newDepth);
+                	newDepth);
             }
         }
         
@@ -71,36 +71,36 @@ public class InternalNode implements BintreeNode {
             int half = xWid / 2;
             if (obj.intersects(x, y, z, half, yWid, zWid)) {
                 left = left.remove(obj, x, y, z, half, yWid, zWid, 
-                		newDepth);
+                	newDepth);
             }
             int newX = x + half;
             if (obj.intersects(newX, y, z, half, yWid, zWid)) {
                 right = right.remove(obj, newX, y, z, half, yWid, zWid, 
-                		newDepth);
+                	newDepth);
             }
         } 
         else if (axis == 1) { // Y split
             int half = yWid / 2;
             if (obj.intersects(x, y, z, xWid, half, zWid)) {
                 left = left.remove(obj, x, y, z, xWid, half, zWid, 
-                		newDepth);
+                	newDepth);
             }
             int newY = y + half;
             if (obj.intersects(x, newY, z, xWid, half, zWid)) {
                 right = right.remove(obj, x, newY, z, xWid, half, zWid, 
-                		newDepth);
+                	newDepth);
             }
         } 
         else { // Z split
             int half = zWid / 2;
             if (obj.intersects(x, y, z, xWid, yWid, half)) {
                 left = left.remove(obj, x, y, z, xWid, yWid, half, 
-                		newDepth);
+                	newDepth);
             }
             int newZ = z + half;
             if (obj.intersects(x, y, newZ, xWid, yWid, half)) {
                 right = right.remove(obj, x, y, newZ, xWid, yWid, half, 
-                		newDepth);
+                	newDepth);
             }
         }
 
@@ -139,7 +139,7 @@ public class InternalNode implements BintreeNode {
         // Use a temporary array to track what we've seen to avoid double 
         // counting. Since max objects to consider merge is small (e.g. 3+3=6), 
         // array is fine
-        AirObject[] temp = new AirObject[100]; // arbitrarily safe size for check
+        AirObject[] temp = new AirObject[100]; 
         int count = 0;
         
         count = collectUnique(temp, count, left);
@@ -159,7 +159,7 @@ public class InternalNode implements BintreeNode {
                 AirObject obj = list.get(i);
                 boolean found = false;
                 for (int k = 0; k < count; k++) {
-                    if (arr[k] == obj) { // Reference equality is sufficient here
+                    if (arr[k] == obj) { 
                         found = true;
                         break;
                     }
@@ -173,7 +173,8 @@ public class InternalNode implements BintreeNode {
     }
     
     /**
-     * Adds objects from node to the newLeaf, avoiding duplicates in the newLeaf.
+     * Adds objects from node to the newLeaf, 
+     * avoiding duplicates in the newLeaf.
      */
     private void addUnique(LeafNode target, BintreeNode source) {
         if (source instanceof LeafNode) {
