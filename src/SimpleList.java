@@ -66,6 +66,14 @@ public class SimpleList {
         data[size] = obj;
         size++;
     }
+    
+    /**
+     * Clears all objects from list
+     */
+    public void clear() {
+    	this.data = new AirObject[DEFAULT_CAPACITY];
+        this.size = 0;
+    }
 
 
     /**

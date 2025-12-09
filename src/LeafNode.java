@@ -50,7 +50,7 @@ public class LeafNode implements BintreeNode {
      * Helper to check if all objects in the list share a common intersection.
      * @return True if they all intersect, false otherwise.
      */
-    private boolean allIntersect() {
+    public boolean allIntersect() {
         if (data.size() == 0) {
             return false;
         }
@@ -122,12 +122,14 @@ public class LeafNode implements BintreeNode {
         }
 
         // 2. Sort Array (Alphabetical)
-        for (int i = 0; i < items.length - 1; i++) {
-            for (int j = 0; j < items.length - i - 1; j++) {
-                if (items[j].compareTo(items[j + 1]) > 0) {
+        int newItemsLength = items.length - 1;
+        for (int i = 0; i < newItemsLength; i++) {
+            for (int j = 0; j < newItemsLength - i; j++) {
+            	int newJ = j + 1;
+                if (items[j].compareTo(items[newJ]) > 0) {
                     AirObject temp = items[j];
-                    items[j] = items[j + 1];
-                    items[j + 1] = temp;
+                    items[j] = items[newJ];
+                    items[newJ] = temp;
                 }
             }
         }
@@ -221,12 +223,14 @@ public class LeafNode implements BintreeNode {
         
         if (count > 0) {
             // Sort Array (Alphabetical)
-            for (int i = 0; i < count - 1; i++) {
-                for (int j = 0; j < count - i - 1; j++) {
-                    if (matches[j].compareTo(matches[j + 1]) > 0) {
+        	int newCount = count - 1;
+            for (int i = 0; i < newCount; i++) {
+                for (int j = 0; j < newCount - i; j++) {
+                	int newJ = j + 1;
+                    if (matches[j].compareTo(matches[newJ]) > 0) {
                         AirObject temp = matches[j];
-                        matches[j] = matches[j + 1];
-                        matches[j + 1] = temp;
+                        matches[j] = matches[newJ];
+                        matches[newJ] = temp;
                     }
                 }
             }

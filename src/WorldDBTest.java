@@ -626,4 +626,183 @@ public class WorldDBTest extends TestCase {
         assertTrue(tree.contains("Leaf with 1 objects"));
         assertFalse(tree.contains("I ("));
     }
+    
+    /**
+     * Test 1: Coordinate Origin Lower Boundaries (0 vs negative).
+     * Targets: x < 0, y < 0, z < 0
+     */
+    public void testAddOriginNegative() {
+        // Valid Baseline: x=0, y=0, z=0
+        AirObject valid = new AirPlane("A", 0, 0, 0, 10, 10, 10, "Test", 1, 1);
+        assertTrue("Should add valid object at 0,0,0", db.add(valid));
+
+        // Invalid X: -1
+        AirObject badX = new AirPlane("BX", -1, 0, 0, 10, 10, 10, "Test", 1, 1);
+        assertFalse("Should fail for x = -1", db.add(badX));
+
+        // Invalid Y: -1
+        AirObject badY = new AirPlane("BY", 0, -1, 0, 10, 10, 10, "Test", 1, 1);
+        assertFalse("Should fail for y = -1", db.add(badY));
+
+        // Invalid Z: -1
+        AirObject badZ = new AirPlane("BZ", 0, 0, -1, 10, 10, 10, "Test", 1, 1);
+        assertFalse("Should fail for z = -1", db.add(badZ));
+    }
+
+    /**
+     * Test 2: Coordinate Origin Upper Boundaries (1024 vs 1023).
+     * Targets: x >= worldSize, y >= worldSize, z >= worldSize
+     * World Size = 1024.
+     */
+    public void testAddOriginTooLarge() {
+        // Valid High Boundary: 1023 (Must use width 1 to fit in world)
+        AirObject validHigh = new AirPlane("High", 1023, 1023, 1023, 1, 1, 1, "Test", 1, 1);
+        assertTrue("Should add valid object at 1023", db.add(validHigh));
+
+        // Invalid X: 1024
+        AirObject badX = new AirPlane("BX", 1024, 0, 0, 1, 1, 1, "Test", 1, 1);
+        assertFalse("Should fail for x = 1024", db.add(badX));
+
+        // Invalid Y: 1024
+        AirObject badY = new AirPlane("BY", 0, 1024, 0, 1, 1, 1, "Test", 1, 1);
+        assertFalse("Should fail for y = 1024", db.add(badY));
+
+        // Invalid Z: 1024
+        AirObject badZ = new AirPlane("BZ", 0, 0, 1024, 1, 1, 1, "Test", 1, 1);
+        assertFalse("Should fail for z = 1024", db.add(badZ));
+    }
+
+    /**
+     * Test 3: Dimension Lower Boundaries (0 vs 1).
+     * Targets: xw <= 0, yw <= 0, zw <= 0
+     */
+    public void testAddDimensionsZeroOrNegative() {
+        // Valid Smallest Dimension: 1
+        AirObject validSmall = new AirPlane("S", 0, 0, 0, 1, 1, 1, "Test", 1, 1);
+        assertTrue("Should add valid object width 1", db.add(validSmall));
+
+        // Invalid X Width: 0
+        AirObject badX = new AirPlane("BX", 0, 0, 0, 0, 10, 10, "Test", 1, 1);
+        assertFalse("Should fail for xWid = 0", db.add(badX));
+
+        // Invalid Y Width: -5
+        AirObject badY = new AirPlane("BY", 0, 0, 0, 10, -5, 10, "Test", 1, 1);
+        assertFalse("Should fail for yWid = -5", db.add(badY));
+
+        // Invalid Z Width: 0
+        AirObject badZ = new AirPlane("BZ", 0, 0, 0, 10, 10, 0, "Test", 1, 1);
+        assertFalse("Should fail for zWid = 0", db.add(badZ));
+    }
+
+    /**
+     * Test 4: Dimension Upper Boundaries (1024 vs 1025).
+     * Targets: xw > worldSize, yw > worldSize, zw > worldSize
+     * (Assuming Origin is 0)
+     */
+    public void testAddDimensionsTooLarge() {
+        // Valid Max Dimension: 1024 (at origin 0)
+        AirObject validMax = new AirPlane("Max", 0, 0, 0, 1024, 1024, 1024, "Test", 1, 1);
+        assertTrue("Should add valid object width 1024 at origin 0", db.add(validMax));
+
+        // Invalid X Width: 1025
+        AirObject badX = new AirPlane("BX", 0, 0, 0, 1025, 10, 10, "Test", 1, 1);
+        assertFalse("Should fail for xWid = 1025", db.add(badX));
+
+        // Invalid Y Width: 1025
+        AirObject badY = new AirPlane("BY", 0, 0, 0, 10, 1025, 10, "Test", 1, 1);
+        assertFalse("Should fail for yWid = 1025", db.add(badY));
+
+        // Invalid Z Width: 1025
+        AirObject badZ = new AirPlane("BZ", 0, 0, 0, 10, 10, 1025, "Test", 1, 1);
+        assertFalse("Should fail for zWid = 1025", db.add(badZ));
+    }
+
+    /**
+     * Test 5: Box Bounds Logic (Coordinate + Width > WorldSize).
+     * Targets: x + xw > worldSize, etc.
+     */
+    public void testAddBoxExceedsWorld() {
+        // Valid Boundary Sum: 1024
+        // x=1000, w=24 -> 1024 (Allowed)
+        AirObject validSum = new AirPlane("V", 1000, 1000, 1000, 24, 24, 24, "Test", 1, 1);
+        assertTrue("Should add object ending exactly at 1024", db.add(validSum));
+
+        // Invalid Sum X: 1025
+        // x=1000, w=25 -> 1025 (Exceeds)
+        AirObject badX = new AirPlane("BX", 1000, 0, 0, 25, 10, 10, "Test", 1, 1);
+        assertFalse("Should fail for x(1000) + w(25) > 1024", db.add(badX));
+
+        // Invalid Sum Y: 1025
+        // y=1023, w=2 -> 1025
+        AirObject badY = new AirPlane("BY", 0, 1023, 0, 10, 2, 10, "Test", 1, 1);
+        assertFalse("Should fail for y(1023) + w(2) > 1024", db.add(badY));
+
+        // Invalid Sum Z: 1025
+        AirObject badZ = new AirPlane("BZ", 0, 0, 1000, 10, 10, 25, "Test", 1, 1);
+        assertFalse("Should fail for z(1000) + w(25) > 1024", db.add(badZ));
+    }
+    
+    /**
+     * Test Intersect: Coordinate Lower Boundaries.
+     * Targets: x < 0, y < 0, z < 0
+     * Ensures -1 fails, but 0 passes (checked in valid test).
+     */
+    public void testIntersectCoordsNegative() {
+        // Valid params for others
+        int v = 0; 
+        int w = 10;
+        
+        // Invalid X: -1
+        assertNull("Should return null for x = -1", 
+                   db.intersect(-1, v, v, w, w, w));
+                   
+        // Invalid Y: -1
+        assertNull("Should return null for y = -1", 
+                   db.intersect(v, -1, v, w, w, w));
+                   
+        // Invalid Z: -1
+        assertNull("Should return null for z = -1", 
+                   db.intersect(v, v, -1, w, w, w));
+    }
+
+    /**
+     * Test Intersect: Coordinate Upper Boundaries.
+     * Targets: x >= 1024, y >= 1024, z >= 1024
+     * Mutation Killer: Checks that 1024 is rejected. If mutated to '>', 1024 would pass.
+     */
+    public void testIntersectCoordsTooLarge() {
+        int v = 0;
+        int w = 10;
+        int max = 1024; // World Size
+        
+        // Invalid X: 1024
+        assertNull("Should return null for x = 1024", 
+                   db.intersect(max, v, v, w, w, w));
+                   
+        // Invalid Y: 1024
+        assertNull("Should return null for y = 1024", 
+                   db.intersect(v, max, v, w, w, w));
+                   
+        // Invalid Z: 1024
+        assertNull("Should return null for z = 1024", 
+                   db.intersect(v, v, max, w, w, w));
+    }
+
+    /**
+     * Test Intersect: Valid Edge Cases.
+     * Targets: Rejection of false positives. 
+     * Ensures 0 and 1023 are NOT rejected by the coordinate check.
+     */
+    public void testIntersectCoordsEdgeValid() {
+        // 1. Zero Edge (Min)
+        // If "x < 0" was mutated to "x <= 0", this would return null.
+        assertNotNull("Should accept x=0", db.intersect(0, 0, 0, 10, 10, 10));
+        
+        // 2. Max Edge (1023)
+        // Must use width=1 so 1023+1 <= 1024.
+        // If "x >= 1024" was mutated to "x >= 1023", this would return null.
+        assertNotNull("Should accept x=1023", db.intersect(1023, 0, 0, 1, 10, 10));
+        assertNotNull("Should accept y=1023", db.intersect(0, 1023, 0, 10, 1, 10));
+        assertNotNull("Should accept z=1023", db.intersect(0, 0, 1023, 10, 10, 1));
+    }
 }
