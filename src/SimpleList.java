@@ -71,7 +71,7 @@ public class SimpleList {
      * Clears all objects from list
      */
     public void clear() {
-    	this.data = new AirObject[DEFAULT_CAPACITY];
+        this.data = new AirObject[DEFAULT_CAPACITY];
         this.size = 0;
     }
 

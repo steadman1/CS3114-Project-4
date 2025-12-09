@@ -566,7 +566,7 @@ public class InternalNodeTest extends TestCase {
         
         assertEquals(
                 node.print(
-                		new StringBuilder(), 0, 0, 0, 128, 128, 128, 0), 3);
+                    new StringBuilder(), 0, 0, 0, 128, 128, 128, 0), 3);
     }
     
     /**

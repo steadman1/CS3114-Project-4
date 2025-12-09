@@ -125,7 +125,7 @@ public class LeafNode implements BintreeNode {
         int newItemsLength = items.length - 1;
         for (int i = 0; i < newItemsLength; i++) {
             for (int j = 0; j < newItemsLength - i; j++) {
-            	int newJ = j + 1;
+                int newJ = j + 1;
                 if (items[j].compareTo(items[newJ]) > 0) {
                     AirObject temp = items[j];
                     items[j] = items[newJ];
@@ -209,7 +209,7 @@ public class LeafNode implements BintreeNode {
             if (obj.intersects(qx, qy, qz, qxwid, qywid, qzwid)) {
                 
                 // FIX 3: Check 2 (Duplicate Avoidance)
-                // Only print if the object's origin is strictly within THIS node
+                // Only print if the object's origin is within THIS node
                 // This prevents printing the same object multiple times if it 
                 // spans leaves
                 if (obj.getXorig() >= x && obj.getXorig() < x + xWid &&
