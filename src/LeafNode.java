@@ -223,10 +223,10 @@ public class LeafNode implements BintreeNode {
         
         if (count > 0) {
             // Sort Array (Alphabetical)
-        	int newCount = count - 1;
+            int newCount = count - 1;
             for (int i = 0; i < newCount; i++) {
                 for (int j = 0; j < newCount - i; j++) {
-                	int newJ = j + 1;
+                    int newJ = j + 1;
                     if (matches[j].compareTo(matches[newJ]) > 0) {
                         AirObject temp = matches[j];
                         matches[j] = matches[newJ];
@@ -240,7 +240,6 @@ public class LeafNode implements BintreeNode {
                 sb.append(matches[i].toString()).append("\n");
             }
         }
-        
         return 1;
     }
 }
